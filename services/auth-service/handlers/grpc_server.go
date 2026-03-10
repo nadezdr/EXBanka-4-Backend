@@ -32,12 +32,12 @@ func (s *AuthServer) Login(ctx context.Context, req *pb_auth.LoginRequest) (*pb_
 		return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 	}
 
-	accessToken, err := generateToken(creds.Id, req.Username, "access", 15*time.Minute)
+	accessToken, err := generateToken(creds.Id, req.Username, "access", creds.Dozvole, 15*time.Minute)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
 
-	refreshToken, err := generateToken(creds.Id, req.Username, "refresh", 7*24*time.Hour)
+	refreshToken, err := generateToken(creds.Id, req.Username, "refresh", creds.Dozvole, 7*24*time.Hour)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
@@ -71,7 +71,16 @@ func (s *AuthServer) Refresh(_ context.Context, req *pb_auth.RefreshRequest) (*p
 	userID := int64(claims["user_id"].(float64))
 	username := claims["username"].(string)
 
-	accessToken, err := generateToken(userID, username, "access", 15*time.Minute)
+	var dozvole []string
+	if raw, ok := claims["dozvole"].([]interface{}); ok {
+		for _, d := range raw {
+			if s, ok := d.(string); ok {
+				dozvole = append(dozvole, s)
+			}
+		}
+	}
+
+	accessToken, err := generateToken(userID, username, "access", dozvole, 15*time.Minute)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
@@ -79,11 +88,12 @@ func (s *AuthServer) Refresh(_ context.Context, req *pb_auth.RefreshRequest) (*p
 	return &pb_auth.RefreshResponse{AccessToken: accessToken}, nil
 }
 
-func generateToken(userID int64, username, tokenType string, d time.Duration) (string, error) {
+func generateToken(userID int64, username, tokenType string, dozvole []string, d time.Duration) (string, error) {
 	claims := jwt.MapClaims{
 		"user_id":  userID,
 		"username": username,
 		"type":     tokenType,
+		"dozvole":  dozvole,
 		"exp":      time.Now().Add(d).Unix(),
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(jwtSecret))

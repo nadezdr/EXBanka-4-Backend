@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	gwgrpc "github.com/exbanka/backend/services/api-gateway/grpc"
 	"github.com/exbanka/backend/services/api-gateway/handlers"
+	"github.com/exbanka/backend/services/api-gateway/middleware"
 )
 
 func main() {
@@ -22,8 +23,8 @@ func main() {
 	defer authConn.Close()
 
 	r := gin.Default()
-	r.GET("/employees", handlers.GetEmployees(employeeClient))
-	r.GET("/employees/search", handlers.SearchEmployees(employeeClient))
+	r.GET("/employees", middleware.RequireRole("ADMIN"), handlers.GetEmployees(employeeClient))
+	r.GET("/employees/search", middleware.RequireRole("ADMIN"), handlers.SearchEmployees(employeeClient))
 	r.POST("/login", handlers.Login(authClient))
 	r.POST("/refresh", handlers.Refresh(authClient))
 	r.Run(":8081")

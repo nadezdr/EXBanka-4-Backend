@@ -401,6 +401,7 @@ type GetEmployeeCredentialsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
 	PasswordHash  string                 `protobuf:"bytes,2,opt,name=password_hash,json=passwordHash,proto3" json:"password_hash,omitempty"`
+	Dozvole       []string               `protobuf:"bytes,3,rep,name=dozvole,proto3" json:"dozvole,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -449,6 +450,13 @@ func (x *GetEmployeeCredentialsResponse) GetPasswordHash() string {
 	return ""
 }
 
+func (x *GetEmployeeCredentialsResponse) GetDozvole() []string {
+	if x != nil {
+		return x.Dozvole
+	}
+	return nil
+}
+
 var File_employee_proto protoreflect.FileDescriptor
 
 const file_employee_proto_rawDesc = "" +
@@ -480,10 +488,11 @@ const file_employee_proto_rawDesc = "" +
 	"\x17SearchEmployeesResponse\x120\n" +
 	"\temployees\x18\x01 \x03(\v2\x12.employee.EmployeeR\temployees\";\n" +
 	"\x1dGetEmployeeCredentialsRequest\x12\x1a\n" +
-	"\busername\x18\x01 \x01(\tR\busername\"U\n" +
+	"\busername\x18\x01 \x01(\tR\busername\"o\n" +
 	"\x1eGetEmployeeCredentialsResponse\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12#\n" +
-	"\rpassword_hash\x18\x02 \x01(\tR\fpasswordHash2\xae\x02\n" +
+	"\rpassword_hash\x18\x02 \x01(\tR\fpasswordHash\x12\x18\n" +
+	"\adozvole\x18\x03 \x03(\tR\adozvole2\xae\x02\n" +
 	"\x0fEmployeeService\x12V\n" +
 	"\x0fGetAllEmployees\x12 .employee.GetAllEmployeesRequest\x1a!.employee.GetAllEmployeesResponse\x12V\n" +
 	"\x0fSearchEmployees\x12 .employee.SearchEmployeesRequest\x1a!.employee.SearchEmployeesResponse\x12k\n" +
