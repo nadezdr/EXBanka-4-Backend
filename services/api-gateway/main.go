@@ -9,14 +9,22 @@ import (
 )
 
 func main() {
-	employeeClient, conn, err := gwgrpc.NewEmployeeClient("localhost:50051")
+	employeeClient, empConn, err := gwgrpc.NewEmployeeClient("localhost:50051")
 	if err != nil {
 		log.Fatalf("failed to connect to employee-service: %v", err)
 	}
-	defer conn.Close()
+	defer empConn.Close()
+
+	authClient, authConn, err := gwgrpc.NewAuthClient("localhost:50052")
+	if err != nil {
+		log.Fatalf("failed to connect to auth-service: %v", err)
+	}
+	defer authConn.Close()
 
 	r := gin.Default()
 	r.GET("/employees", handlers.GetEmployees(employeeClient))
 	r.GET("/employees/search", handlers.SearchEmployees(employeeClient))
+	r.POST("/login", handlers.Login(authClient))
+	r.POST("/refresh", handlers.Refresh(authClient))
 	r.Run(":8081")
 }

@@ -6,6 +6,8 @@ import (
 
 	"github.com/lib/pq"
 	pb "github.com/exbanka/backend/shared/pb/employee"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type EmployeeServer struct {
@@ -70,4 +72,20 @@ func (s *EmployeeServer) SearchEmployees(ctx context.Context, req *pb.SearchEmpl
 		employees = append(employees, &e)
 	}
 	return &pb.SearchEmployeesResponse{Employees: employees}, nil
+}
+
+func (s *EmployeeServer) GetEmployeeCredentials(ctx context.Context, req *pb.GetEmployeeCredentialsRequest) (*pb.GetEmployeeCredentialsResponse, error) {
+	var id int64
+	var passwordHash string
+	err := s.DB.QueryRowContext(ctx,
+		`SELECT id, password FROM employees WHERE username = $1`,
+		req.Username,
+	).Scan(&id, &passwordHash)
+	if err == sql.ErrNoRows {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+	if err != nil {
+		return nil, err
+	}
+	return &pb.GetEmployeeCredentialsResponse{Id: id, PasswordHash: passwordHash}, nil
 }
