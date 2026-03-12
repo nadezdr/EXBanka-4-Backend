@@ -38,6 +38,9 @@ definitions:
       gender:
         example: M
         type: string
+      jmbg:
+        example: "0101990710006"
+        type: string
       last_name:
         example: Marković
         type: string
@@ -57,6 +60,7 @@ definitions:
     - email
     - first_name
     - gender
+    - jmbg
     - last_name
     - phone_number
     - position
@@ -73,11 +77,11 @@ definitions:
     type: object
   handlers.LoginRequest:
     properties:
+      email:
+        example: jdoe@ankabanka.com
+        type: string
       password:
         example: secret
-        type: string
-      username:
-        example: jdoe
         type: string
     type: object
   handlers.RefreshRequest:
@@ -114,6 +118,9 @@ definitions:
         type: string
       gender:
         example: M
+        type: string
+      jmbg:
+        example: "0101990710006"
         type: string
       last_name:
         example: Marković
@@ -166,6 +173,8 @@ definitions:
       id:
         type: integer
       ime:
+        type: string
+      jmbg:
         type: string
       pol:
         type: string
@@ -541,7 +550,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate with username and password, receive JWT tokens.
+      description: Authenticate with email and password, receive JWT tokens.
       parameters:
       - description: Login credentials
         in: body

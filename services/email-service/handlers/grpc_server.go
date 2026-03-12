@@ -11,9 +11,15 @@ import (
 	"github.com/exbanka/backend/services/email-service/queue"
 )
 
+type Publisher interface {
+	Publish(msg queue.ActivationMessage) error
+	PublishPasswordReset(msg queue.PasswordResetMessage) error
+	PublishPasswordConfirmation(msg queue.PasswordConfirmationMessage) error
+}
+
 type EmailServer struct {
 	pb.UnimplementedEmailServiceServer
-	Producer *queue.Producer
+	Producer Publisher
 }
 
 func (s *EmailServer) SendActivationEmail(_ context.Context, req *pb.SendActivationEmailRequest) (*pb.SendActivationEmailResponse, error) {
