@@ -561,7 +561,7 @@ const docTemplate = `{
         },
         "/login": {
             "post": {
-                "description": "Authenticate with username and password, receive JWT tokens.",
+                "description": "Authenticate with email and password, receive JWT tokens.",
                 "consumes": [
                     "application/json"
                 ],
@@ -701,6 +701,7 @@ const docTemplate = `{
                 "email",
                 "first_name",
                 "gender",
+                "jmbg",
                 "last_name",
                 "phone_number",
                 "position",
@@ -730,6 +731,10 @@ const docTemplate = `{
                 "gender": {
                     "type": "string",
                     "example": "M"
+                },
+                "jmbg": {
+                    "type": "string",
+                    "example": "0101990710006"
                 },
                 "last_name": {
                     "type": "string",
@@ -766,13 +771,13 @@ const docTemplate = `{
         "handlers.LoginRequest": {
             "type": "object",
             "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "jdoe@ankabanka.com"
+                },
                 "password": {
                     "type": "string",
                     "example": "secret"
-                },
-                "username": {
-                    "type": "string",
-                    "example": "jdoe"
                 }
             }
         },
@@ -838,6 +843,10 @@ const docTemplate = `{
                     "type": "string",
                     "example": "M"
                 },
+                "jmbg": {
+                    "type": "string",
+                    "example": "0101990710006"
+                },
                 "last_name": {
                     "type": "string",
                     "example": "Marković"
@@ -896,6 +905,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "ime": {
+                    "type": "string"
+                },
+                "jmbg": {
                     "type": "string"
                 },
                 "pol": {
