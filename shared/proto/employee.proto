@@ -18,29 +18,37 @@ message Employee {
   string departman       = 11;
   bool   aktivan         = 12;
   repeated string dozvole = 13;
+  string jmbg            = 14;
 }
 
 // password is intentionally excluded — never returned over the API
 
-message GetAllEmployeesRequest {}
+message GetAllEmployeesRequest {
+  int32 page      = 1;
+  int32 page_size = 2;
+}
 
 message GetAllEmployeesResponse {
-  repeated Employee employees = 1;
+  repeated Employee employees  = 1;
+  int32             total_count = 2;
 }
 
 message SearchEmployeesRequest {
-  string email    = 1;
-  string ime      = 2;
-  string prezime  = 3;
-  string pozicija = 4;
+  string email     = 1;
+  string ime       = 2;
+  string prezime   = 3;
+  string pozicija  = 4;
+  int32  page      = 5;
+  int32  page_size = 6;
 }
 
 message SearchEmployeesResponse {
-  repeated Employee employees = 1;
+  repeated Employee employees   = 1;
+  int32             total_count = 2;
 }
 
 message GetEmployeeCredentialsRequest {
-  string username = 1;
+  string email = 1;
 }
 
 message GetEmployeeCredentialsResponse {
@@ -61,15 +69,69 @@ message CreateEmployeeRequest {
   string username       = 8;
   string pozicija       = 9;
   string departman      = 10;
+  string jmbg           = 11;
 }
 
 message CreateEmployeeResponse {
   Employee employee = 1;
 }
 
+message GetEmployeeByIdRequest {
+  int64 id = 1;
+}
+
+message GetEmployeeByIdResponse {
+  Employee employee = 1;
+}
+
+message UpdateEmployeeRequest {
+  int64           id             = 1;
+  string          ime            = 2;
+  string          prezime        = 3;
+  string          datum_rodjenja = 4;
+  string          pol            = 5;
+  string          email          = 6;
+  string          broj_telefona  = 7;
+  string          adresa         = 8;
+  string          username       = 9;
+  string          pozicija       = 10;
+  string          departman      = 11;
+  bool            aktivan        = 12;
+  repeated string dozvole        = 13;
+  string          jmbg           = 14;
+}
+
+message UpdateEmployeeResponse {
+  Employee employee = 1;
+}
+
+message ActivateEmployeeRequest {
+  int64  employee_id   = 1;
+  string password_hash = 2;
+}
+message ActivateEmployeeResponse {}
+
+message GetEmployeeByEmailRequest  { string email = 1; }
+message GetEmployeeByEmailResponse {
+  int64  id         = 1;
+  string first_name = 2;
+  string email      = 3;
+}
+
+message UpdatePasswordRequest {
+  int64  employee_id   = 1;
+  string password_hash = 2;
+}
+message UpdatePasswordResponse {}
+
 service EmployeeService {
   rpc GetAllEmployees(GetAllEmployeesRequest) returns (GetAllEmployeesResponse);
   rpc SearchEmployees(SearchEmployeesRequest) returns (SearchEmployeesResponse);
   rpc GetEmployeeCredentials(GetEmployeeCredentialsRequest) returns (GetEmployeeCredentialsResponse);
   rpc CreateEmployee(CreateEmployeeRequest) returns (CreateEmployeeResponse);
+  rpc GetEmployeeById(GetEmployeeByIdRequest) returns (GetEmployeeByIdResponse);
+  rpc UpdateEmployee(UpdateEmployeeRequest) returns (UpdateEmployeeResponse);
+  rpc ActivateEmployee(ActivateEmployeeRequest) returns (ActivateEmployeeResponse);
+  rpc GetEmployeeByEmail(GetEmployeeByEmailRequest) returns (GetEmployeeByEmailResponse);
+  rpc UpdatePassword(UpdatePasswordRequest) returns (UpdatePasswordResponse);
 }

@@ -2,7 +2,12 @@ package handlers
 
 import (
 	"context"
+	"crypto/rand"
+	"database/sql"
+	"encoding/hex"
+	"log"
 	"time"
+	"unicode"
 
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -10,6 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb_auth "github.com/exbanka/backend/shared/pb/auth"
+	pb_email "github.com/exbanka/backend/shared/pb/email"
 	pb_emp "github.com/exbanka/backend/shared/pb/employee"
 )
 
@@ -17,12 +23,14 @@ const jwtSecret = "secret-key-change-in-production"
 
 type AuthServer struct {
 	pb_auth.UnimplementedAuthServiceServer
+	DB             *sql.DB
 	EmployeeClient pb_emp.EmployeeServiceClient
+	EmailClient    pb_email.EmailServiceClient
 }
 
 func (s *AuthServer) Login(ctx context.Context, req *pb_auth.LoginRequest) (*pb_auth.LoginResponse, error) {
 	creds, err := s.EmployeeClient.GetEmployeeCredentials(ctx, &pb_emp.GetEmployeeCredentialsRequest{
-		Username: req.Username,
+		Email: req.Email,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, "invalid credentials")
@@ -39,12 +47,18 @@ func (s *AuthServer) Login(ctx context.Context, req *pb_auth.LoginRequest) (*pb_
 		return nil, status.Error(codes.Unauthenticated, "invalid credentials")
 	}
 
-	accessToken, err := generateToken(creds.Id, req.Username, "access", creds.Dozvole, 15*time.Minute)
+	empResp, err := s.EmployeeClient.GetEmployeeById(ctx, &pb_emp.GetEmployeeByIdRequest{Id: creds.Id})
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to fetch employee")
+	}
+	emp := empResp.Employee
+
+	accessToken, err := generateToken(creds.Id, emp.Email, "access", creds.Dozvole, emp.Ime, emp.Prezime, emp.Email, 15*time.Minute)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
 
-	refreshToken, err := generateToken(creds.Id, req.Username, "refresh", creds.Dozvole, 7*24*time.Hour)
+	refreshToken, err := generateToken(creds.Id, emp.Email, "refresh", creds.Dozvole, emp.Ime, emp.Prezime, emp.Email, 7*24*time.Hour)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
@@ -75,8 +89,20 @@ func (s *AuthServer) Refresh(_ context.Context, req *pb_auth.RefreshRequest) (*p
 		return nil, status.Error(codes.Unauthenticated, "invalid token type")
 	}
 
-	userID := int64(claims["user_id"].(float64))
-	username := claims["username"].(string)
+	userIDRaw, ok := claims["user_id"].(float64)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "invalid token claims")
+	}
+	usernameRaw, ok := claims["username"].(string)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "invalid token claims")
+	}
+	userID := int64(userIDRaw)
+	username := usernameRaw
+
+	firstName, _ := claims["first_name"].(string)
+	lastName, _ := claims["last_name"].(string)
+	email, _ := claims["email"].(string)
 
 	var dozvole []string
 	if raw, ok := claims["dozvole"].([]interface{}); ok {
@@ -87,7 +113,7 @@ func (s *AuthServer) Refresh(_ context.Context, req *pb_auth.RefreshRequest) (*p
 		}
 	}
 
-	accessToken, err := generateToken(userID, username, "access", dozvole, 15*time.Minute)
+	accessToken, err := generateToken(userID, username, "access", dozvole, firstName, lastName, email, 15*time.Minute)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "failed to generate token")
 	}
@@ -95,13 +121,209 @@ func (s *AuthServer) Refresh(_ context.Context, req *pb_auth.RefreshRequest) (*p
 	return &pb_auth.RefreshResponse{AccessToken: accessToken}, nil
 }
 
-func generateToken(userID int64, username, tokenType string, dozvole []string, d time.Duration) (string, error) {
+func generateToken(userID int64, username, tokenType string, dozvole []string, firstName, lastName, email string, d time.Duration) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id":  userID,
-		"username": username,
-		"type":     tokenType,
-		"dozvole":  dozvole,
-		"exp":      time.Now().Add(d).Unix(),
+		"user_id":    userID,
+		"username":   username,
+		"first_name": firstName,
+		"last_name":  lastName,
+		"email":      email,
+		"type":       tokenType,
+		"dozvole":    dozvole,
+		"exp":        time.Now().Add(d).Unix(),
 	}
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(jwtSecret))
+}
+
+func (s *AuthServer) CreateActivationToken(ctx context.Context, req *pb_auth.CreateActivationTokenRequest) (*pb_auth.CreateActivationTokenResponse, error) {
+	token, err := generateActivationToken()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to generate token")
+	}
+	_, err = s.DB.ExecContext(ctx,
+		`INSERT INTO activation_tokens (token, employee_id, expires_at) VALUES ($1, $2, now() + interval '24 hours')`,
+		token, req.EmployeeId,
+	)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to store activation token: %v", err)
+	}
+	return &pb_auth.CreateActivationTokenResponse{Token: token}, nil
+}
+
+func (s *AuthServer) ActivateAccount(ctx context.Context, req *pb_auth.ActivateAccountRequest) (*pb_auth.ActivateAccountResponse, error) {
+	var employeeID int64
+	var expiresAt time.Time
+	err := s.DB.QueryRowContext(ctx,
+		`SELECT employee_id, expires_at FROM activation_tokens WHERE token = $1`,
+		req.Token,
+	).Scan(&employeeID, &expiresAt)
+	if err == sql.ErrNoRows {
+		return nil, status.Error(codes.NotFound, "invalid or expired token")
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to look up token: %v", err)
+	}
+
+	if time.Now().After(expiresAt) {
+		if _, err := s.DB.ExecContext(ctx, `DELETE FROM activation_tokens WHERE token = $1`, req.Token); err != nil {
+			log.Printf("failed to delete expired activation token: %v", err)
+		}
+		return nil, status.Error(codes.FailedPrecondition, "activation token has expired")
+	}
+
+	empResp, err := s.EmployeeClient.GetEmployeeById(ctx, &pb_emp.GetEmployeeByIdRequest{Id: employeeID})
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to fetch employee: %v", err)
+	}
+	if empResp.Employee.Aktivan {
+		return nil, status.Error(codes.FailedPrecondition, "account already activated")
+	}
+
+	if req.Password != req.ConfirmPassword {
+		return nil, status.Error(codes.InvalidArgument, "passwords do not match")
+	}
+	if err := validatePassword(req.Password); err != nil {
+		return nil, err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to hash password")
+	}
+
+	_, err = s.EmployeeClient.ActivateEmployee(ctx, &pb_emp.ActivateEmployeeRequest{
+		EmployeeId:   employeeID,
+		PasswordHash: string(hash),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := s.DB.ExecContext(ctx, `DELETE FROM activation_tokens WHERE token = $1`, req.Token); err != nil {
+		log.Printf("failed to delete used activation token: %v", err)
+	}
+
+	emp := empResp.Employee
+	go func() {
+		_, err := s.EmailClient.SendPasswordConfirmationEmail(context.Background(), &pb_email.SendActivationEmailRequest{
+			Email:     emp.Email,
+			FirstName: emp.Ime,
+		})
+		if err != nil {
+			log.Printf("failed to send password confirmation email: %v", err)
+		}
+	}()
+
+	return &pb_auth.ActivateAccountResponse{}, nil
+}
+
+func (s *AuthServer) RequestPasswordReset(ctx context.Context, req *pb_auth.RequestPasswordResetRequest) (*pb_auth.RequestPasswordResetResponse, error) {
+	empResp, err := s.EmployeeClient.GetEmployeeByEmail(ctx, &pb_emp.GetEmployeeByEmailRequest{Email: req.Email})
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := generateActivationToken()
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to generate token")
+	}
+
+	_, err = s.DB.ExecContext(ctx,
+		`INSERT INTO password_reset_tokens (token, employee_id, expires_at) VALUES ($1, $2, now() + interval '24 hours')`,
+		token, empResp.Id,
+	)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to store password reset token: %v", err)
+	}
+
+	return &pb_auth.RequestPasswordResetResponse{
+		Token:     token,
+		FirstName: empResp.FirstName,
+		Email:     empResp.Email,
+	}, nil
+}
+
+func (s *AuthServer) ResetPassword(ctx context.Context, req *pb_auth.ResetPasswordRequest) (*pb_auth.ResetPasswordResponse, error) {
+	var employeeID int64
+	var expiresAt time.Time
+	err := s.DB.QueryRowContext(ctx,
+		`SELECT employee_id, expires_at FROM password_reset_tokens WHERE token = $1`,
+		req.Token,
+	).Scan(&employeeID, &expiresAt)
+	if err == sql.ErrNoRows {
+		return nil, status.Error(codes.NotFound, "invalid or expired token")
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to look up token: %v", err)
+	}
+
+	if time.Now().After(expiresAt) {
+		if _, err := s.DB.ExecContext(ctx, `DELETE FROM password_reset_tokens WHERE token = $1`, req.Token); err != nil {
+			log.Printf("failed to delete expired password reset token: %v", err)
+		}
+		return nil, status.Error(codes.FailedPrecondition, "password reset token has expired")
+	}
+
+	if req.Password != req.ConfirmPassword {
+		return nil, status.Error(codes.InvalidArgument, "passwords do not match")
+	}
+	if err := validatePassword(req.Password); err != nil {
+		return nil, err
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to hash password")
+	}
+
+	_, err = s.EmployeeClient.UpdatePassword(ctx, &pb_emp.UpdatePasswordRequest{
+		EmployeeId:   employeeID,
+		PasswordHash: string(hash),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := s.DB.ExecContext(ctx, `DELETE FROM password_reset_tokens WHERE token = $1`, req.Token); err != nil {
+		log.Printf("failed to delete used password reset token: %v", err)
+	}
+	return &pb_auth.ResetPasswordResponse{}, nil
+}
+
+func validatePassword(p string) error {
+	if len(p) < 8 {
+		return status.Error(codes.InvalidArgument, "password must be at least 8 characters")
+	}
+	if len(p) > 32 {
+		return status.Error(codes.InvalidArgument, "password must be at most 32 characters")
+	}
+	var digits, upper, lower int
+	for _, r := range p {
+		switch {
+		case unicode.IsDigit(r):
+			digits++
+		case unicode.IsUpper(r):
+			upper++
+		case unicode.IsLower(r):
+			lower++
+		}
+	}
+	if digits < 2 {
+		return status.Error(codes.InvalidArgument, "password must contain at least 2 numbers")
+	}
+	if upper < 1 {
+		return status.Error(codes.InvalidArgument, "password must contain at least 1 uppercase letter")
+	}
+	if lower < 1 {
+		return status.Error(codes.InvalidArgument, "password must contain at least 1 lowercase letter")
+	}
+	return nil
+}
+
+func generateActivationToken() (string, error) {
+	b := make([]byte, 32)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }
