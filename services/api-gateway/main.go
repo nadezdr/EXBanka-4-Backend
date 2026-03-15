@@ -29,6 +29,12 @@ func main() {
 	}
 	defer empConn.Close()
 
+	accountClient, accConn, err := gwgrpc.NewAccountClient("localhost:50054")
+	if err != nil {
+		log.Fatalf("failed to connect to account-service: %v", err)
+	}
+	defer accConn.Close()
+
 	authClient, authConn, err := gwgrpc.NewAuthClient("localhost:50052")
 	if err != nil {
 		log.Fatalf("failed to connect to auth-service: %v", err)
@@ -57,6 +63,7 @@ func main() {
 	r.GET("/employees/search", middleware.RequireRole("ADMIN"), handlers.SearchEmployees(employeeClient))
 	r.PUT("/employees/:id", middleware.RequireRole("ADMIN"), handlers.UpdateEmployee(employeeClient))
 	r.POST("/employees", middleware.RequireRole("ADMIN"), handlers.CreateEmployee(employeeClient, authClient, emailClient))
+	r.POST("/api/accounts/create", middleware.RequireRole("EMPLOYEE"), handlers.CreateAccount(accountClient))
 	r.POST("/login", handlers.Login(authClient))
 	r.POST("/refresh", handlers.Refresh(authClient))
 	r.POST("/auth/activate", handlers.Activate(authClient))

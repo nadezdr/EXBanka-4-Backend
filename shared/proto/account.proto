@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/account";
+
+message CompanyData {
+  string name                = 1;
+  string registration_number = 2;
+  string pib                 = 3;
+  string activity_code       = 4;
+  string address             = 5;
+}
+
+message CreateAccountRequest {
+  int64       client_id       = 1;
+  string      account_type    = 2;
+  string      currency_code   = 3;
+  double      initial_balance = 4;
+  string      account_name    = 5;
+  bool        create_card     = 6;
+  int64       employee_id     = 7;
+  CompanyData company_data    = 8;
+}
+
+message AccountResponse {
+  int64  id                = 1;
+  string account_number    = 2;
+  string account_name      = 3;
+  int64  owner_id          = 4;
+  int64  employee_id       = 5;
+  string currency_code     = 6;
+  string account_type      = 7;
+  string status            = 8;
+  double balance           = 9;
+  double available_balance = 10;
+  string created_date      = 11;
+}
+
+message CreateAccountResponse {
+  AccountResponse account = 1;
+}
+
+service AccountService {
+  rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+}
