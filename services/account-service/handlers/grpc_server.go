@@ -20,6 +20,62 @@ type AccountServer struct {
 	EmailClient pb_email.EmailServiceClient
 }
 
+func (s *AccountServer) GetMyAccounts(ctx context.Context, req *pb.GetMyAccountsRequest) (*pb.GetMyAccountsResponse, error) {
+	// 1. Fetch accounts from account_db
+	rows, err := s.DB.QueryContext(ctx,
+		`SELECT id, account_name, account_number, available_balance, currency_id
+		 FROM accounts WHERE owner_id = $1
+		 ORDER BY available_balance DESC`,
+		req.OwnerId,
+	)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to query accounts: %v", err)
+	}
+	defer rows.Close()
+
+	type row struct {
+		id               int64
+		accountName      string
+		accountNumber    string
+		availableBalance float64
+		currencyID       int64
+	}
+	var accs []row
+	for rows.Next() {
+		var r row
+		if err := rows.Scan(&r.id, &r.accountName, &r.accountNumber, &r.availableBalance, &r.currencyID); err != nil {
+			return nil, status.Errorf(codes.Internal, "failed to scan account: %v", err)
+		}
+		accs = append(accs, r)
+	}
+
+	// 2. Build currency_id → code map from exchange_db
+	currencyMap := map[int64]string{}
+	for _, a := range accs {
+		if _, ok := currencyMap[a.currencyID]; !ok {
+			var code string
+			if err := s.ExchangeDB.QueryRowContext(ctx,
+				`SELECT code FROM currencies WHERE id = $1`, a.currencyID,
+			).Scan(&code); err == nil {
+				currencyMap[a.currencyID] = code
+			}
+		}
+	}
+
+	// 3. Assemble response
+	summaries := make([]*pb.AccountSummary, 0, len(accs))
+	for _, a := range accs {
+		summaries = append(summaries, &pb.AccountSummary{
+			Id:               a.id,
+			AccountName:      a.accountName,
+			AccountNumber:    a.accountNumber,
+			AvailableBalance: a.availableBalance,
+			CurrencyCode:     currencyMap[a.currencyID],
+		})
+	}
+	return &pb.GetMyAccountsResponse{Accounts: summaries}, nil
+}
+
 // accountTypeCode maps account type string to 2-digit code used in account number generation.
 func accountTypeCode(accountType string) string {
 	switch accountType {

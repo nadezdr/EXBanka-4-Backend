@@ -41,6 +41,23 @@ message CreateAccountResponse {
   AccountResponse account = 1;
 }
 
+message GetMyAccountsRequest {
+  int64 owner_id = 1;
+}
+
+message AccountSummary {
+  int64  id                = 1;
+  string account_name      = 2;
+  string account_number    = 3;
+  double available_balance = 4;
+  string currency_code     = 5;
+}
+
+message GetMyAccountsResponse {
+  repeated AccountSummary accounts = 1;
+}
+
 service AccountService {
   rpc CreateAccount(CreateAccountRequest) returns (CreateAccountResponse);
+  rpc GetMyAccounts(GetMyAccountsRequest)  returns (GetMyAccountsResponse);
 }

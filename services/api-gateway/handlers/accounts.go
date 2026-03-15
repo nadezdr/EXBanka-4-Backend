@@ -31,6 +31,47 @@ type companyReq struct {
 	Address            string `json:"address"`
 }
 
+// GetMyAccounts godoc
+// @Summary      Get my accounts
+// @Description  Returns all accounts for the currently authenticated client, sorted by available balance descending.
+// @Tags         accounts
+// @Produce      json
+// @Success      200  {array}   map[string]interface{}
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/accounts/my [get]
+func GetMyAccounts(accountClient pb.AccountServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ownerID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "could not extract identity from token"})
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+
+		resp, err := accountClient.GetMyAccounts(ctx, &pb.GetMyAccountsRequest{OwnerId: ownerID})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		result := make([]gin.H, 0, len(resp.Accounts))
+		for _, a := range resp.Accounts {
+			result = append(result, gin.H{
+				"accountId":        a.Id,
+				"accountName":      a.AccountName,
+				"accountNumber":    a.AccountNumber,
+				"availableBalance": a.AvailableBalance,
+				"currency":         a.CurrencyCode,
+			})
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
 // CreateAccount godoc
 // @Summary      Create bank account
 // @Description  Creates a new bank account for a client. Requires employee authentication.
