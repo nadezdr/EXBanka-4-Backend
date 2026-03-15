@@ -29,6 +29,12 @@ func main() {
 	}
 	defer empConn.Close()
 
+	paymentClient, pmConn, err := gwgrpc.NewPaymentClient("localhost:50055")
+	if err != nil {
+		log.Fatalf("failed to connect to payment-service: %v", err)
+	}
+	defer pmConn.Close()
+
 	accountClient, accConn, err := gwgrpc.NewAccountClient("localhost:50054")
 	if err != nil {
 		log.Fatalf("failed to connect to account-service: %v", err)
@@ -63,6 +69,7 @@ func main() {
 	r.GET("/employees/search", middleware.RequireRole("ADMIN"), handlers.SearchEmployees(employeeClient))
 	r.PUT("/employees/:id", middleware.RequireRole("ADMIN"), handlers.UpdateEmployee(employeeClient))
 	r.POST("/employees", middleware.RequireRole("ADMIN"), handlers.CreateEmployee(employeeClient, authClient, emailClient))
+	r.POST("/api/payments/create", handlers.CreatePayment(paymentClient))
 	r.GET("/api/accounts/my", handlers.GetMyAccounts(accountClient))
 	r.GET("/api/accounts/:accountId", handlers.GetAccount(accountClient))
 	r.PUT("/api/accounts/:accountId/name", handlers.RenameAccount(accountClient))

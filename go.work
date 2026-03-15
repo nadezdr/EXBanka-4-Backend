@@ -8,5 +8,6 @@ use (
 	./services/email-service
 	./services/employee-service
 	./services/exchange-service
+	./services/payment-service
 	./shared
 )

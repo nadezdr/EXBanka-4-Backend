@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package payment;
+
+option go_package = "github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/payment";
+
+message CreatePaymentRequest {
+  int64  client_id        = 1;
+  string from_account     = 2;
+  string recipient_name   = 3;
+  string recipient_account = 4;
+  double amount           = 5;
+  string payment_code     = 6;
+  string reference_number = 7;
+  string purpose          = 8;
+}
+
+message CreatePaymentResponse {
+  int64  id               = 1;
+  string order_number     = 2;
+  string from_account     = 3;
+  string to_account       = 4;
+  double initial_amount   = 5;
+  double final_amount     = 6;
+  double fee              = 7;
+  string status           = 8;
+  string timestamp        = 9;
+}
+
+service PaymentService {
+  rpc CreatePayment(CreatePaymentRequest) returns (CreatePaymentResponse);
+}
