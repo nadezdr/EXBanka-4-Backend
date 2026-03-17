@@ -96,6 +96,19 @@ type CreatePaymentRecipientRequest struct {
 	AccountNumber string `json:"accountNumber" binding:"required"`
 }
 
+// CreatePaymentRecipient godoc
+// @Summary      Create a payment recipient
+// @Description  Saves a new payment recipient for the authenticated client.
+// @Tags         recipients
+// @Accept       json
+// @Produce      json
+// @Param        body  body      CreatePaymentRecipientRequest  true  "Recipient data"
+// @Success      201   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/recipients [post]
 func CreatePaymentRecipient(paymentClient pb.PaymentServiceClient) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var req CreatePaymentRecipientRequest
@@ -133,6 +146,16 @@ func CreatePaymentRecipient(paymentClient pb.PaymentServiceClient) gin.HandlerFu
 	}
 }
 
+// GetPaymentRecipients godoc
+// @Summary      List payment recipients
+// @Description  Returns all saved payment recipients for the authenticated client.
+// @Tags         recipients
+// @Produce      json
+// @Success      200  {array}   map[string]interface{}
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/recipients [get]
 func GetPaymentRecipients(paymentClient pb.PaymentServiceClient) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientID, err := middleware.GetUserIDFromToken(c)
@@ -176,6 +199,21 @@ type UpdatePaymentRecipientRequest struct {
 	AccountNumber string `json:"accountNumber" binding:"required"`
 }
 
+// UpdatePaymentRecipient godoc
+// @Summary      Update a payment recipient
+// @Description  Updates a saved payment recipient. Only the owning client can update.
+// @Tags         recipients
+// @Accept       json
+// @Produce      json
+// @Param        id    path  int                            true  "Recipient ID"
+// @Param        body  body  UpdatePaymentRecipientRequest  true  "Recipient data"
+// @Success      200   {object}  map[string]interface{}
+// @Failure      400   {object}  map[string]string
+// @Failure      401   {object}  map[string]string
+// @Failure      404   {object}  map[string]string
+// @Failure      500   {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/recipients/{id} [put]
 func UpdatePaymentRecipient(paymentClient pb.PaymentServiceClient) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		recipientID, err := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -224,6 +262,17 @@ func UpdatePaymentRecipient(paymentClient pb.PaymentServiceClient) gin.HandlerFu
 	}
 }
 
+// DeletePaymentRecipient godoc
+// @Summary      Delete a payment recipient
+// @Description  Deletes a saved payment recipient. Only the owning client can delete.
+// @Tags         recipients
+// @Param        id  path  int  true  "Recipient ID"
+// @Success      204
+// @Failure      401  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/recipients/{id} [delete]
 func DeletePaymentRecipient(paymentClient pb.PaymentServiceClient) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		recipientID, err := strconv.ParseInt(c.Param("id"), 10, 64)
