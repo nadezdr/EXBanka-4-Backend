@@ -955,11 +955,18 @@ func TestActivateClientAuth_HappyPath(t *testing.T) {
 		&pb_client.ActivateClientResponse{}, nil,
 	)
 
-	s := &AuthServer{DB: db, ClientClient: clientClient}
+	emailClient := &mockEmailClient{}
+	emailClient.On("SendPasswordConfirmationEmail", mock.Anything, mock.Anything).Return(
+		&pb_email.SendActivationEmailResponse{}, nil,
+	)
+
+	s := &AuthServer{DB: db, ClientClient: clientClient, EmailClient: emailClient}
 	resp, err := s.ActivateClient(context.Background(), &pb_auth.ActivateClientRequest{
 		Token: "valid-token", Password: "Abcdef12", ConfirmPassword: "Abcdef12",
 	})
 	require.NoError(t, err)
 	assert.NotNil(t, resp)
+	time.Sleep(50 * time.Millisecond) // wait for email goroutine
 	clientClient.AssertExpectations(t)
+	emailClient.AssertExpectations(t)
 }
