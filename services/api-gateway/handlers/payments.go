@@ -262,6 +262,83 @@ func UpdatePaymentRecipient(paymentClient pb.PaymentServiceClient) gin.HandlerFu
 	}
 }
 
+// GetPayments godoc
+// @Summary      List client payments
+// @Description  Returns all payments made from the authenticated client's accounts, with optional filters.
+// @Tags         payments
+// @Produce      json
+// @Param        date_from   query  string  false  "From date (RFC3339)"
+// @Param        date_to     query  string  false  "To date (RFC3339)"
+// @Param        amount_min  query  number  false  "Min amount"
+// @Param        amount_max  query  number  false  "Max amount"
+// @Param        status      query  string  false  "Payment status"
+// @Success      200  {array}   map[string]interface{}
+// @Failure      401  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/payments [get]
+func GetPayments(paymentClient pb.PaymentServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		clientID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "could not extract identity from token"})
+			return
+		}
+
+		amountMin, _ := strconv.ParseFloat(c.Query("amount_min"), 64)
+		amountMax, _ := strconv.ParseFloat(c.Query("amount_max"), 64)
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+
+		resp, err := paymentClient.GetPayments(ctx, &pb.GetPaymentsRequest{
+			ClientId:  clientID,
+			DateFrom:  c.Query("date_from"),
+			DateTo:    c.Query("date_to"),
+			AmountMin: amountMin,
+			AmountMax: amountMax,
+			Status:    c.Query("status"),
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		type paymentJSON struct {
+			ID              int64   `json:"id"`
+			OrderNumber     string  `json:"orderNumber"`
+			FromAccount     string  `json:"fromAccount"`
+			ToAccount       string  `json:"toAccount"`
+			InitialAmount   float64 `json:"initialAmount"`
+			FinalAmount     float64 `json:"finalAmount"`
+			Fee             float64 `json:"fee"`
+			PaymentCode     string  `json:"paymentCode"`
+			ReferenceNumber string  `json:"referenceNumber"`
+			Purpose         string  `json:"purpose"`
+			Timestamp       string  `json:"timestamp"`
+			Status          string  `json:"status"`
+		}
+		result := make([]paymentJSON, 0, len(resp.Payments))
+		for _, p := range resp.Payments {
+			result = append(result, paymentJSON{
+				ID:              p.Id,
+				OrderNumber:     p.OrderNumber,
+				FromAccount:     p.FromAccount,
+				ToAccount:       p.ToAccount,
+				InitialAmount:   p.InitialAmount,
+				FinalAmount:     p.FinalAmount,
+				Fee:             p.Fee,
+				PaymentCode:     p.PaymentCode,
+				ReferenceNumber: p.ReferenceNumber,
+				Purpose:         p.Purpose,
+				Timestamp:       p.Timestamp,
+				Status:          p.Status,
+			})
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
 // DeletePaymentRecipient godoc
 // @Summary      Delete a payment recipient
 // @Description  Deletes a saved payment recipient. Only the owning client can delete.

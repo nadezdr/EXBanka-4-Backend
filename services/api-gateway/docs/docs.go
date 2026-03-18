@@ -308,6 +308,85 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/payments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all payments made from the authenticated client's accounts, with optional filters.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "payments"
+                ],
+                "summary": "List client payments",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "From date (RFC3339)",
+                        "name": "date_from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "To date (RFC3339)",
+                        "name": "date_to",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Min amount",
+                        "name": "amount_min",
+                        "in": "query"
+                    },
+                    {
+                        "type": "number",
+                        "description": "Max amount",
+                        "name": "amount_max",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Payment status",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/payments/create": {
             "post": {
                 "security": [
