@@ -973,6 +973,738 @@ func (*ActivateClientResponse) Descriptor() ([]byte, []int) {
 	return file_auth_proto_rawDescGZIP(), []int{19}
 }
 
+type Approval struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientId      int64                  `protobuf:"varint,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	ActionType    string                 `protobuf:"bytes,3,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"` // LOGIN | PAYMENT | TRANSFER | LIMIT_CHANGE | CARD_REQUEST
+	Payload       string                 `protobuf:"bytes,4,opt,name=payload,proto3" json:"payload,omitempty"`                         // JSON string
+	Status        string                 `protobuf:"bytes,5,opt,name=status,proto3" json:"status,omitempty"`                           // PENDING | APPROVED | REJECTED | EXPIRED
+	CreatedAt     string                 `protobuf:"bytes,6,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ExpiresAt     string                 `protobuf:"bytes,7,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Approval) Reset() {
+	*x = Approval{}
+	mi := &file_auth_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Approval) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Approval) ProtoMessage() {}
+
+func (x *Approval) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Approval.ProtoReflect.Descriptor instead.
+func (*Approval) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *Approval) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *Approval) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+func (x *Approval) GetActionType() string {
+	if x != nil {
+		return x.ActionType
+	}
+	return ""
+}
+
+func (x *Approval) GetPayload() string {
+	if x != nil {
+		return x.Payload
+	}
+	return ""
+}
+
+func (x *Approval) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *Approval) GetCreatedAt() string {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return ""
+}
+
+func (x *Approval) GetExpiresAt() string {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return ""
+}
+
+type CreateApprovalRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientId      int64                  `protobuf:"varint,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	ActionType    string                 `protobuf:"bytes,2,opt,name=action_type,json=actionType,proto3" json:"action_type,omitempty"`
+	Payload       string                 `protobuf:"bytes,3,opt,name=payload,proto3" json:"payload,omitempty"` // JSON string with action details
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateApprovalRequest) Reset() {
+	*x = CreateApprovalRequest{}
+	mi := &file_auth_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateApprovalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateApprovalRequest) ProtoMessage() {}
+
+func (x *CreateApprovalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateApprovalRequest.ProtoReflect.Descriptor instead.
+func (*CreateApprovalRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *CreateApprovalRequest) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+func (x *CreateApprovalRequest) GetActionType() string {
+	if x != nil {
+		return x.ActionType
+	}
+	return ""
+}
+
+func (x *CreateApprovalRequest) GetPayload() string {
+	if x != nil {
+		return x.Payload
+	}
+	return ""
+}
+
+type CreateApprovalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approval      *Approval              `protobuf:"bytes,1,opt,name=approval,proto3" json:"approval,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateApprovalResponse) Reset() {
+	*x = CreateApprovalResponse{}
+	mi := &file_auth_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateApprovalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateApprovalResponse) ProtoMessage() {}
+
+func (x *CreateApprovalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateApprovalResponse.ProtoReflect.Descriptor instead.
+func (*CreateApprovalResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *CreateApprovalResponse) GetApproval() *Approval {
+	if x != nil {
+		return x.Approval
+	}
+	return nil
+}
+
+type GetApprovalRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetApprovalRequest) Reset() {
+	*x = GetApprovalRequest{}
+	mi := &file_auth_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetApprovalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetApprovalRequest) ProtoMessage() {}
+
+func (x *GetApprovalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetApprovalRequest.ProtoReflect.Descriptor instead.
+func (*GetApprovalRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *GetApprovalRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type GetApprovalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approval      *Approval              `protobuf:"bytes,1,opt,name=approval,proto3" json:"approval,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetApprovalResponse) Reset() {
+	*x = GetApprovalResponse{}
+	mi := &file_auth_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetApprovalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetApprovalResponse) ProtoMessage() {}
+
+func (x *GetApprovalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetApprovalResponse.ProtoReflect.Descriptor instead.
+func (*GetApprovalResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *GetApprovalResponse) GetApproval() *Approval {
+	if x != nil {
+		return x.Approval
+	}
+	return nil
+}
+
+type GetClientApprovalsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientId      int64                  `protobuf:"varint,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClientApprovalsRequest) Reset() {
+	*x = GetClientApprovalsRequest{}
+	mi := &file_auth_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClientApprovalsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClientApprovalsRequest) ProtoMessage() {}
+
+func (x *GetClientApprovalsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClientApprovalsRequest.ProtoReflect.Descriptor instead.
+func (*GetClientApprovalsRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *GetClientApprovalsRequest) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+type GetClientApprovalsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approvals     []*Approval            `protobuf:"bytes,1,rep,name=approvals,proto3" json:"approvals,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetClientApprovalsResponse) Reset() {
+	*x = GetClientApprovalsResponse{}
+	mi := &file_auth_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetClientApprovalsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetClientApprovalsResponse) ProtoMessage() {}
+
+func (x *GetClientApprovalsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetClientApprovalsResponse.ProtoReflect.Descriptor instead.
+func (*GetClientApprovalsResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *GetClientApprovalsResponse) GetApprovals() []*Approval {
+	if x != nil {
+		return x.Approvals
+	}
+	return nil
+}
+
+type UpdateApprovalStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	ClientId      int64                  `protobuf:"varint,2,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"` // for ownership check
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`                      // APPROVED | REJECTED
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateApprovalStatusRequest) Reset() {
+	*x = UpdateApprovalStatusRequest{}
+	mi := &file_auth_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateApprovalStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateApprovalStatusRequest) ProtoMessage() {}
+
+func (x *UpdateApprovalStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateApprovalStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateApprovalStatusRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *UpdateApprovalStatusRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *UpdateApprovalStatusRequest) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+func (x *UpdateApprovalStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateApprovalStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approval      *Approval              `protobuf:"bytes,1,opt,name=approval,proto3" json:"approval,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateApprovalStatusResponse) Reset() {
+	*x = UpdateApprovalStatusResponse{}
+	mi := &file_auth_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateApprovalStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateApprovalStatusResponse) ProtoMessage() {}
+
+func (x *UpdateApprovalStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateApprovalStatusResponse.ProtoReflect.Descriptor instead.
+func (*UpdateApprovalStatusResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *UpdateApprovalStatusResponse) GetApproval() *Approval {
+	if x != nil {
+		return x.Approval
+	}
+	return nil
+}
+
+type RegisterPushTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientId      int64                  `protobuf:"varint,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	Token         string                 `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterPushTokenRequest) Reset() {
+	*x = RegisterPushTokenRequest{}
+	mi := &file_auth_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterPushTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterPushTokenRequest) ProtoMessage() {}
+
+func (x *RegisterPushTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterPushTokenRequest.ProtoReflect.Descriptor instead.
+func (*RegisterPushTokenRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *RegisterPushTokenRequest) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+func (x *RegisterPushTokenRequest) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+type RegisterPushTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RegisterPushTokenResponse) Reset() {
+	*x = RegisterPushTokenResponse{}
+	mi := &file_auth_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RegisterPushTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RegisterPushTokenResponse) ProtoMessage() {}
+
+func (x *RegisterPushTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RegisterPushTokenResponse.ProtoReflect.Descriptor instead.
+func (*RegisterPushTokenResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{30}
+}
+
+type UnregisterPushTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientId      int64                  `protobuf:"varint,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnregisterPushTokenRequest) Reset() {
+	*x = UnregisterPushTokenRequest{}
+	mi := &file_auth_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnregisterPushTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnregisterPushTokenRequest) ProtoMessage() {}
+
+func (x *UnregisterPushTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnregisterPushTokenRequest.ProtoReflect.Descriptor instead.
+func (*UnregisterPushTokenRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *UnregisterPushTokenRequest) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+type UnregisterPushTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UnregisterPushTokenResponse) Reset() {
+	*x = UnregisterPushTokenResponse{}
+	mi := &file_auth_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UnregisterPushTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UnregisterPushTokenResponse) ProtoMessage() {}
+
+func (x *UnregisterPushTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UnregisterPushTokenResponse.ProtoReflect.Descriptor instead.
+func (*UnregisterPushTokenResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{32}
+}
+
+type GetPushTokenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ClientId      int64                  `protobuf:"varint,1,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPushTokenRequest) Reset() {
+	*x = GetPushTokenRequest{}
+	mi := &file_auth_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPushTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPushTokenRequest) ProtoMessage() {}
+
+func (x *GetPushTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPushTokenRequest.ProtoReflect.Descriptor instead.
+func (*GetPushTokenRequest) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *GetPushTokenRequest) GetClientId() int64 {
+	if x != nil {
+		return x.ClientId
+	}
+	return 0
+}
+
+type GetPushTokenResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetPushTokenResponse) Reset() {
+	*x = GetPushTokenResponse{}
+	mi := &file_auth_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetPushTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetPushTokenResponse) ProtoMessage() {}
+
+func (x *GetPushTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_auth_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetPushTokenResponse.ProtoReflect.Descriptor instead.
+func (*GetPushTokenResponse) Descriptor() ([]byte, []int) {
+	return file_auth_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *GetPushTokenResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
 var File_auth_proto protoreflect.FileDescriptor
 
 const file_auth_proto_rawDesc = "" +
@@ -1029,7 +1761,51 @@ const file_auth_proto_rawDesc = "" +
 	"\x05token\x18\x01 \x01(\tR\x05token\x12\x1a\n" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\x12)\n" +
 	"\x10confirm_password\x18\x03 \x01(\tR\x0fconfirmPassword\"\x18\n" +
-	"\x16ActivateClientResponse2\xa1\x06\n" +
+	"\x16ActivateClientResponse\"\xc8\x01\n" +
+	"\bApproval\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
+	"\tclient_id\x18\x02 \x01(\x03R\bclientId\x12\x1f\n" +
+	"\vaction_type\x18\x03 \x01(\tR\n" +
+	"actionType\x12\x18\n" +
+	"\apayload\x18\x04 \x01(\tR\apayload\x12\x16\n" +
+	"\x06status\x18\x05 \x01(\tR\x06status\x12\x1d\n" +
+	"\n" +
+	"created_at\x18\x06 \x01(\tR\tcreatedAt\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\a \x01(\tR\texpiresAt\"o\n" +
+	"\x15CreateApprovalRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\x03R\bclientId\x12\x1f\n" +
+	"\vaction_type\x18\x02 \x01(\tR\n" +
+	"actionType\x12\x18\n" +
+	"\apayload\x18\x03 \x01(\tR\apayload\"D\n" +
+	"\x16CreateApprovalResponse\x12*\n" +
+	"\bapproval\x18\x01 \x01(\v2\x0e.auth.ApprovalR\bapproval\"$\n" +
+	"\x12GetApprovalRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\"A\n" +
+	"\x13GetApprovalResponse\x12*\n" +
+	"\bapproval\x18\x01 \x01(\v2\x0e.auth.ApprovalR\bapproval\"8\n" +
+	"\x19GetClientApprovalsRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\x03R\bclientId\"J\n" +
+	"\x1aGetClientApprovalsResponse\x12,\n" +
+	"\tapprovals\x18\x01 \x03(\v2\x0e.auth.ApprovalR\tapprovals\"b\n" +
+	"\x1bUpdateApprovalStatusRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1b\n" +
+	"\tclient_id\x18\x02 \x01(\x03R\bclientId\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\"J\n" +
+	"\x1cUpdateApprovalStatusResponse\x12*\n" +
+	"\bapproval\x18\x01 \x01(\v2\x0e.auth.ApprovalR\bapproval\"M\n" +
+	"\x18RegisterPushTokenRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\x03R\bclientId\x12\x14\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\"\x1b\n" +
+	"\x19RegisterPushTokenResponse\"9\n" +
+	"\x1aUnregisterPushTokenRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\x03R\bclientId\"\x1d\n" +
+	"\x1bUnregisterPushTokenResponse\"2\n" +
+	"\x13GetPushTokenRequest\x12\x1b\n" +
+	"\tclient_id\x18\x01 \x01(\x03R\bclientId\",\n" +
+	"\x14GetPushTokenResponse\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token2\xe3\n" +
+	"\n" +
 	"\vAuthService\x120\n" +
 	"\x05Login\x12\x12.auth.LoginRequest\x1a\x13.auth.LoginResponse\x126\n" +
 	"\aRefresh\x12\x14.auth.RefreshRequest\x1a\x15.auth.RefreshResponse\x12`\n" +
@@ -1040,7 +1816,14 @@ const file_auth_proto_rawDesc = "" +
 	"\vClientLogin\x12\x18.auth.ClientLoginRequest\x1a\x19.auth.ClientLoginResponse\x12H\n" +
 	"\rClientRefresh\x12\x1a.auth.ClientRefreshRequest\x1a\x1b.auth.ClientRefreshResponse\x12r\n" +
 	"\x1bCreateClientActivationToken\x12(.auth.CreateClientActivationTokenRequest\x1a).auth.CreateClientActivationTokenResponse\x12K\n" +
-	"\x0eActivateClient\x12\x1b.auth.ActivateClientRequest\x1a\x1c.auth.ActivateClientResponseB9Z7github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/authb\x06proto3"
+	"\x0eActivateClient\x12\x1b.auth.ActivateClientRequest\x1a\x1c.auth.ActivateClientResponse\x12K\n" +
+	"\x0eCreateApproval\x12\x1b.auth.CreateApprovalRequest\x1a\x1c.auth.CreateApprovalResponse\x12B\n" +
+	"\vGetApproval\x12\x18.auth.GetApprovalRequest\x1a\x19.auth.GetApprovalResponse\x12W\n" +
+	"\x12GetClientApprovals\x12\x1f.auth.GetClientApprovalsRequest\x1a .auth.GetClientApprovalsResponse\x12]\n" +
+	"\x14UpdateApprovalStatus\x12!.auth.UpdateApprovalStatusRequest\x1a\".auth.UpdateApprovalStatusResponse\x12T\n" +
+	"\x11RegisterPushToken\x12\x1e.auth.RegisterPushTokenRequest\x1a\x1f.auth.RegisterPushTokenResponse\x12Z\n" +
+	"\x13UnregisterPushToken\x12 .auth.UnregisterPushTokenRequest\x1a!.auth.UnregisterPushTokenResponse\x12E\n" +
+	"\fGetPushToken\x12\x19.auth.GetPushTokenRequest\x1a\x1a.auth.GetPushTokenResponseB9Z7github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/authb\x06proto3"
 
 var (
 	file_auth_proto_rawDescOnce sync.Once
@@ -1054,7 +1837,7 @@ func file_auth_proto_rawDescGZIP() []byte {
 	return file_auth_proto_rawDescData
 }
 
-var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 20)
+var file_auth_proto_msgTypes = make([]protoimpl.MessageInfo, 35)
 var file_auth_proto_goTypes = []any{
 	(*LoginRequest)(nil),                        // 0: auth.LoginRequest
 	(*LoginResponse)(nil),                       // 1: auth.LoginResponse
@@ -1076,33 +1859,66 @@ var file_auth_proto_goTypes = []any{
 	(*CreateClientActivationTokenResponse)(nil), // 17: auth.CreateClientActivationTokenResponse
 	(*ActivateClientRequest)(nil),               // 18: auth.ActivateClientRequest
 	(*ActivateClientResponse)(nil),              // 19: auth.ActivateClientResponse
+	(*Approval)(nil),                            // 20: auth.Approval
+	(*CreateApprovalRequest)(nil),               // 21: auth.CreateApprovalRequest
+	(*CreateApprovalResponse)(nil),              // 22: auth.CreateApprovalResponse
+	(*GetApprovalRequest)(nil),                  // 23: auth.GetApprovalRequest
+	(*GetApprovalResponse)(nil),                 // 24: auth.GetApprovalResponse
+	(*GetClientApprovalsRequest)(nil),           // 25: auth.GetClientApprovalsRequest
+	(*GetClientApprovalsResponse)(nil),          // 26: auth.GetClientApprovalsResponse
+	(*UpdateApprovalStatusRequest)(nil),         // 27: auth.UpdateApprovalStatusRequest
+	(*UpdateApprovalStatusResponse)(nil),        // 28: auth.UpdateApprovalStatusResponse
+	(*RegisterPushTokenRequest)(nil),            // 29: auth.RegisterPushTokenRequest
+	(*RegisterPushTokenResponse)(nil),           // 30: auth.RegisterPushTokenResponse
+	(*UnregisterPushTokenRequest)(nil),          // 31: auth.UnregisterPushTokenRequest
+	(*UnregisterPushTokenResponse)(nil),         // 32: auth.UnregisterPushTokenResponse
+	(*GetPushTokenRequest)(nil),                 // 33: auth.GetPushTokenRequest
+	(*GetPushTokenResponse)(nil),                // 34: auth.GetPushTokenResponse
 }
 var file_auth_proto_depIdxs = []int32{
-	0,  // 0: auth.AuthService.Login:input_type -> auth.LoginRequest
-	2,  // 1: auth.AuthService.Refresh:input_type -> auth.RefreshRequest
-	4,  // 2: auth.AuthService.CreateActivationToken:input_type -> auth.CreateActivationTokenRequest
-	6,  // 3: auth.AuthService.ActivateAccount:input_type -> auth.ActivateAccountRequest
-	8,  // 4: auth.AuthService.RequestPasswordReset:input_type -> auth.RequestPasswordResetRequest
-	10, // 5: auth.AuthService.ResetPassword:input_type -> auth.ResetPasswordRequest
-	12, // 6: auth.AuthService.ClientLogin:input_type -> auth.ClientLoginRequest
-	14, // 7: auth.AuthService.ClientRefresh:input_type -> auth.ClientRefreshRequest
-	16, // 8: auth.AuthService.CreateClientActivationToken:input_type -> auth.CreateClientActivationTokenRequest
-	18, // 9: auth.AuthService.ActivateClient:input_type -> auth.ActivateClientRequest
-	1,  // 10: auth.AuthService.Login:output_type -> auth.LoginResponse
-	3,  // 11: auth.AuthService.Refresh:output_type -> auth.RefreshResponse
-	5,  // 12: auth.AuthService.CreateActivationToken:output_type -> auth.CreateActivationTokenResponse
-	7,  // 13: auth.AuthService.ActivateAccount:output_type -> auth.ActivateAccountResponse
-	9,  // 14: auth.AuthService.RequestPasswordReset:output_type -> auth.RequestPasswordResetResponse
-	11, // 15: auth.AuthService.ResetPassword:output_type -> auth.ResetPasswordResponse
-	13, // 16: auth.AuthService.ClientLogin:output_type -> auth.ClientLoginResponse
-	15, // 17: auth.AuthService.ClientRefresh:output_type -> auth.ClientRefreshResponse
-	17, // 18: auth.AuthService.CreateClientActivationToken:output_type -> auth.CreateClientActivationTokenResponse
-	19, // 19: auth.AuthService.ActivateClient:output_type -> auth.ActivateClientResponse
-	10, // [10:20] is the sub-list for method output_type
-	0,  // [0:10] is the sub-list for method input_type
-	0,  // [0:0] is the sub-list for extension type_name
-	0,  // [0:0] is the sub-list for extension extendee
-	0,  // [0:0] is the sub-list for field type_name
+	20, // 0: auth.CreateApprovalResponse.approval:type_name -> auth.Approval
+	20, // 1: auth.GetApprovalResponse.approval:type_name -> auth.Approval
+	20, // 2: auth.GetClientApprovalsResponse.approvals:type_name -> auth.Approval
+	20, // 3: auth.UpdateApprovalStatusResponse.approval:type_name -> auth.Approval
+	0,  // 4: auth.AuthService.Login:input_type -> auth.LoginRequest
+	2,  // 5: auth.AuthService.Refresh:input_type -> auth.RefreshRequest
+	4,  // 6: auth.AuthService.CreateActivationToken:input_type -> auth.CreateActivationTokenRequest
+	6,  // 7: auth.AuthService.ActivateAccount:input_type -> auth.ActivateAccountRequest
+	8,  // 8: auth.AuthService.RequestPasswordReset:input_type -> auth.RequestPasswordResetRequest
+	10, // 9: auth.AuthService.ResetPassword:input_type -> auth.ResetPasswordRequest
+	12, // 10: auth.AuthService.ClientLogin:input_type -> auth.ClientLoginRequest
+	14, // 11: auth.AuthService.ClientRefresh:input_type -> auth.ClientRefreshRequest
+	16, // 12: auth.AuthService.CreateClientActivationToken:input_type -> auth.CreateClientActivationTokenRequest
+	18, // 13: auth.AuthService.ActivateClient:input_type -> auth.ActivateClientRequest
+	21, // 14: auth.AuthService.CreateApproval:input_type -> auth.CreateApprovalRequest
+	23, // 15: auth.AuthService.GetApproval:input_type -> auth.GetApprovalRequest
+	25, // 16: auth.AuthService.GetClientApprovals:input_type -> auth.GetClientApprovalsRequest
+	27, // 17: auth.AuthService.UpdateApprovalStatus:input_type -> auth.UpdateApprovalStatusRequest
+	29, // 18: auth.AuthService.RegisterPushToken:input_type -> auth.RegisterPushTokenRequest
+	31, // 19: auth.AuthService.UnregisterPushToken:input_type -> auth.UnregisterPushTokenRequest
+	33, // 20: auth.AuthService.GetPushToken:input_type -> auth.GetPushTokenRequest
+	1,  // 21: auth.AuthService.Login:output_type -> auth.LoginResponse
+	3,  // 22: auth.AuthService.Refresh:output_type -> auth.RefreshResponse
+	5,  // 23: auth.AuthService.CreateActivationToken:output_type -> auth.CreateActivationTokenResponse
+	7,  // 24: auth.AuthService.ActivateAccount:output_type -> auth.ActivateAccountResponse
+	9,  // 25: auth.AuthService.RequestPasswordReset:output_type -> auth.RequestPasswordResetResponse
+	11, // 26: auth.AuthService.ResetPassword:output_type -> auth.ResetPasswordResponse
+	13, // 27: auth.AuthService.ClientLogin:output_type -> auth.ClientLoginResponse
+	15, // 28: auth.AuthService.ClientRefresh:output_type -> auth.ClientRefreshResponse
+	17, // 29: auth.AuthService.CreateClientActivationToken:output_type -> auth.CreateClientActivationTokenResponse
+	19, // 30: auth.AuthService.ActivateClient:output_type -> auth.ActivateClientResponse
+	22, // 31: auth.AuthService.CreateApproval:output_type -> auth.CreateApprovalResponse
+	24, // 32: auth.AuthService.GetApproval:output_type -> auth.GetApprovalResponse
+	26, // 33: auth.AuthService.GetClientApprovals:output_type -> auth.GetClientApprovalsResponse
+	28, // 34: auth.AuthService.UpdateApprovalStatus:output_type -> auth.UpdateApprovalStatusResponse
+	30, // 35: auth.AuthService.RegisterPushToken:output_type -> auth.RegisterPushTokenResponse
+	32, // 36: auth.AuthService.UnregisterPushToken:output_type -> auth.UnregisterPushTokenResponse
+	34, // 37: auth.AuthService.GetPushToken:output_type -> auth.GetPushTokenResponse
+	21, // [21:38] is the sub-list for method output_type
+	4,  // [4:21] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_auth_proto_init() }
@@ -1116,7 +1932,7 @@ func file_auth_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_auth_proto_rawDesc), len(file_auth_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   20,
+			NumMessages:   35,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

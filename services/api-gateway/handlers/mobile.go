@@ -1,0 +1,204 @@
+package handlers
+
+import (
+	"context"
+	"encoding/json"
+	"net/http"
+	"strconv"
+	"time"
+
+	"github.com/gin-gonic/gin"
+	pb "github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/auth"
+	"github.com/RAF-SI-2025/EXBanka-4-Backend/services/api-gateway/middleware"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+)
+
+type approvalResp struct {
+	ID        int64       `json:"id"`
+	Type      string      `json:"type"`
+	Payload   interface{} `json:"payload"`
+	Status    string      `json:"status"`
+	CreatedAt string      `json:"createdAt"`
+	ExpiresAt string      `json:"expiresAt"`
+}
+
+func toApprovalResp(a *pb.Approval) approvalResp {
+	var payload interface{} = map[string]interface{}{}
+	_ = json.Unmarshal([]byte(a.Payload), &payload)
+	return approvalResp{
+		ID:        a.Id,
+		Type:      a.ActionType,
+		Payload:   payload,
+		Status:    a.Status,
+		CreatedAt: a.CreatedAt,
+		ExpiresAt: a.ExpiresAt,
+	}
+}
+
+// GetMyApprovals returns all approvals for the authenticated client.
+func GetMyApprovals(authClient pb.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		resp, err := authClient.GetClientApprovals(ctx, &pb.GetClientApprovalsRequest{ClientId: userID})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		result := make([]approvalResp, len(resp.Approvals))
+		for i, a := range resp.Approvals {
+			result[i] = toApprovalResp(a)
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+// GetMyApprovalById returns a single approval by ID, enforcing client ownership.
+func GetMyApprovalById(authClient pb.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		resp, err := authClient.GetApproval(ctx, &pb.GetApprovalRequest{Id: id})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "approval not found"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		if resp.Approval.ClientId != userID {
+			c.JSON(http.StatusForbidden, gin.H{"error": "forbidden"})
+			return
+		}
+		c.JSON(http.StatusOK, toApprovalResp(resp.Approval))
+	}
+}
+
+// ApproveApproval approves a pending two-factor approval.
+func ApproveApproval(authClient pb.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		resp, err := authClient.UpdateApprovalStatus(ctx, &pb.UpdateApprovalStatusRequest{
+			Id:       id,
+			ClientId: userID,
+			Status:   "APPROVED",
+		})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "approval not found or already resolved"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, toApprovalResp(resp.Approval))
+	}
+}
+
+// RejectApproval rejects a pending two-factor approval.
+func RejectApproval(authClient pb.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		id, err := strconv.ParseInt(c.Param("id"), 10, 64)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		resp, err := authClient.UpdateApprovalStatus(ctx, &pb.UpdateApprovalStatusRequest{
+			Id:       id,
+			ClientId: userID,
+			Status:   "REJECTED",
+		})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": "approval not found or already resolved"})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(http.StatusOK, toApprovalResp(resp.Approval))
+	}
+}
+
+// RegisterMobilePushToken registers (or updates) the Expo push token for the client.
+func RegisterMobilePushToken(authClient pb.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		var body struct {
+			Token string `json:"token" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		_, err = authClient.RegisterPushToken(ctx, &pb.RegisterPushTokenRequest{
+			ClientId: userID,
+			Token:    body.Token,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.Status(http.StatusNoContent)
+	}
+}
+
+// UnregisterMobilePushToken removes the Expo push token for the client.
+func UnregisterMobilePushToken(authClient pb.AuthServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		userID, err := middleware.GetUserIDFromToken(c)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		_, err = authClient.UnregisterPushToken(ctx, &pb.UnregisterPushTokenRequest{ClientId: userID})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+		c.Status(http.StatusNoContent)
+	}
+}

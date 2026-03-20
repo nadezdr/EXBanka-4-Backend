@@ -101,6 +101,12 @@ func main() {
 	r.POST("/clients", middleware.RequireRole("EMPLOYEE"), handlers.CreateClient(clientClient, authClient, emailClient))
 	r.PUT("/clients/:id", middleware.RequireRole("EMPLOYEE"), handlers.UpdateClient(clientClient))
 	r.POST("/client/activate", handlers.ActivateClient(authClient))
+	r.GET("/api/mobile/approvals", handlers.GetMyApprovals(authClient))
+	r.GET("/api/mobile/approvals/:id", handlers.GetMyApprovalById(authClient))
+	r.PUT("/api/twofactor/:id/approve", handlers.ApproveApproval(authClient))
+	r.PUT("/api/twofactor/:id/reject", handlers.RejectApproval(authClient))
+	r.POST("/api/mobile/push-token", handlers.RegisterMobilePushToken(authClient))
+	r.DELETE("/api/mobile/push-token", handlers.UnregisterMobilePushToken(authClient))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(":8081")
 }

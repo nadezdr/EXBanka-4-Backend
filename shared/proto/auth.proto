@@ -69,6 +69,52 @@ message ActivateClientRequest {
 }
 message ActivateClientResponse {}
 
+// ── TwoFactor Approval ────────────────────────────────────────────────────────
+
+message Approval {
+  int64  id          = 1;
+  int64  client_id   = 2;
+  string action_type = 3;  // LOGIN | PAYMENT | TRANSFER | LIMIT_CHANGE | CARD_REQUEST
+  string payload     = 4;  // JSON string
+  string status      = 5;  // PENDING | APPROVED | REJECTED | EXPIRED
+  string created_at  = 6;
+  string expires_at  = 7;
+}
+
+message CreateApprovalRequest {
+  int64  client_id   = 1;
+  string action_type = 2;
+  string payload     = 3;  // JSON string with action details
+}
+message CreateApprovalResponse { Approval approval = 1; }
+
+message GetApprovalRequest   { int64 id = 1; }
+message GetApprovalResponse  { Approval approval = 1; }
+
+message GetClientApprovalsRequest { int64 client_id = 1; }
+message GetClientApprovalsResponse { repeated Approval approvals = 1; }
+
+message UpdateApprovalStatusRequest {
+  int64  id        = 1;
+  int64  client_id = 2;  // for ownership check
+  string status    = 3;  // APPROVED | REJECTED
+}
+message UpdateApprovalStatusResponse { Approval approval = 1; }
+
+// ── Push tokens ───────────────────────────────────────────────────────────────
+
+message RegisterPushTokenRequest {
+  int64  client_id = 1;
+  string token     = 2;
+}
+message RegisterPushTokenResponse {}
+
+message UnregisterPushTokenRequest { int64 client_id = 1; }
+message UnregisterPushTokenResponse {}
+
+message GetPushTokenRequest  { int64 client_id = 1; }
+message GetPushTokenResponse { string token = 1; }
+
 service AuthService {
   rpc Login(LoginRequest)                                   returns (LoginResponse);
   rpc Refresh(RefreshRequest)                               returns (RefreshResponse);
@@ -80,4 +126,13 @@ service AuthService {
   rpc ClientRefresh(ClientRefreshRequest)                                 returns (ClientRefreshResponse);
   rpc CreateClientActivationToken(CreateClientActivationTokenRequest)     returns (CreateClientActivationTokenResponse);
   rpc ActivateClient(ActivateClientRequest)                               returns (ActivateClientResponse);
+
+  rpc CreateApproval(CreateApprovalRequest)                 returns (CreateApprovalResponse);
+  rpc GetApproval(GetApprovalRequest)                       returns (GetApprovalResponse);
+  rpc GetClientApprovals(GetClientApprovalsRequest)         returns (GetClientApprovalsResponse);
+  rpc UpdateApprovalStatus(UpdateApprovalStatusRequest)     returns (UpdateApprovalStatusResponse);
+
+  rpc RegisterPushToken(RegisterPushTokenRequest)           returns (RegisterPushTokenResponse);
+  rpc UnregisterPushToken(UnregisterPushTokenRequest)       returns (UnregisterPushTokenResponse);
+  rpc GetPushToken(GetPushTokenRequest)                     returns (GetPushTokenResponse);
 }
