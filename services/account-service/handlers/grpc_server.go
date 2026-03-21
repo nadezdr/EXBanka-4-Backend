@@ -80,24 +80,25 @@ func (s *AccountServer) GetAccount(ctx context.Context, req *pb.GetAccountReques
 	var a pb.AccountDetails
 	var currencyID int64
 	var ownerID int64
+	var companyID sql.NullInt64
 	err := s.DB.QueryRowContext(ctx, `
 		SELECT id, account_name, account_number, owner_id, balance, available_balance,
 		       balance - available_balance AS reserved_funds,
 		       currency_id, status, account_type,
 		       COALESCE(daily_limit, 0), COALESCE(monthly_limit, 0),
-		       daily_spent, monthly_spent
+		       daily_spent, monthly_spent, company_id
 		FROM accounts WHERE id = $1`, req.AccountId,
 	).Scan(&a.Id, &a.AccountName, &a.AccountNumber, &ownerID,
 		&a.Balance, &a.AvailableBalance, &a.ReservedFunds,
 		&currencyID, &a.Status, &a.AccountType,
-		&a.DailyLimit, &a.MonthlyLimit, &a.DailySpent, &a.MonthlySpent)
+		&a.DailyLimit, &a.MonthlyLimit, &a.DailySpent, &a.MonthlySpent, &companyID)
 	if err == sql.ErrNoRows {
 		return nil, status.Errorf(codes.NotFound, "account %d not found", req.AccountId)
 	}
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to query account: %v", err)
 	}
-	if ownerID != req.OwnerId {
+	if req.OwnerId != 0 && ownerID != req.OwnerId {
 		return nil, status.Errorf(codes.PermissionDenied, "account does not belong to this user")
 	}
 
@@ -110,6 +111,17 @@ func (s *AccountServer) GetAccount(ctx context.Context, req *pb.GetAccountReques
 		`SELECT first_name, last_name FROM clients WHERE id = $1`, ownerID,
 	).Scan(&firstName, &lastName); err == nil {
 		a.Owner = firstName + " " + lastName
+	}
+
+	// Resolve company data for business accounts
+	if companyID.Valid {
+		var c pb.CompanyData
+		if err := s.DB.QueryRowContext(ctx,
+			`SELECT name, registration_number, pib, activity_code, address FROM companies WHERE id = $1`,
+			companyID.Int64,
+		).Scan(&c.Name, &c.RegistrationNumber, &c.Pib, &c.ActivityCode, &c.Address); err == nil {
+			a.CompanyData = &c
+		}
 	}
 
 	return &pb.GetAccountResponse{Account: &a}, nil
@@ -360,10 +372,20 @@ func (s *AccountServer) CreateAccount(ctx context.Context, req *pb.CreateAccount
 }
 
 func (s *AccountServer) UpdateAccountLimits(ctx context.Context, req *pb.UpdateAccountLimitsRequest) (*pb.UpdateAccountLimitsResponse, error) {
-	res, err := s.DB.ExecContext(ctx,
-		`UPDATE accounts SET daily_limit = $1, monthly_limit = $2 WHERE id = $3 AND owner_id = $4`,
-		req.DailyLimit, req.MonthlyLimit, req.AccountId, req.OwnerId,
-	)
+	var res sql.Result
+	var err error
+	if req.OwnerId == 0 {
+		// Employee / admin call — no ownership check
+		res, err = s.DB.ExecContext(ctx,
+			`UPDATE accounts SET daily_limit = $1, monthly_limit = $2 WHERE id = $3`,
+			req.DailyLimit, req.MonthlyLimit, req.AccountId,
+		)
+	} else {
+		res, err = s.DB.ExecContext(ctx,
+			`UPDATE accounts SET daily_limit = $1, monthly_limit = $2 WHERE id = $3 AND owner_id = $4`,
+			req.DailyLimit, req.MonthlyLimit, req.AccountId, req.OwnerId,
+		)
+	}
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to update limits: %v", err)
 	}

@@ -605,6 +605,7 @@ type AccountDetails struct {
 	MonthlyLimit     float64                `protobuf:"fixed64,12,opt,name=monthly_limit,json=monthlyLimit,proto3" json:"monthly_limit,omitempty"`
 	DailySpent       float64                `protobuf:"fixed64,13,opt,name=daily_spent,json=dailySpent,proto3" json:"daily_spent,omitempty"`
 	MonthlySpent     float64                `protobuf:"fixed64,14,opt,name=monthly_spent,json=monthlySpent,proto3" json:"monthly_spent,omitempty"`
+	CompanyData      *CompanyData           `protobuf:"bytes,15,opt,name=company_data,json=companyData,proto3" json:"company_data,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -735,6 +736,13 @@ func (x *AccountDetails) GetMonthlySpent() float64 {
 		return x.MonthlySpent
 	}
 	return 0
+}
+
+func (x *AccountDetails) GetCompanyData() *CompanyData {
+	if x != nil {
+		return x.CompanyData
+	}
+	return nil
 }
 
 type GetAccountResponse struct {
@@ -1221,7 +1229,7 @@ const file_account_proto_rawDesc = "" +
 	"\x11GetAccountRequest\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\x01 \x01(\x03R\taccountId\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\x03R\aownerId\"\xda\x03\n" +
+	"\bowner_id\x18\x02 \x01(\x03R\aownerId\"\x93\x04\n" +
 	"\x0eAccountDetails\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12!\n" +
 	"\faccount_name\x18\x02 \x01(\tR\vaccountName\x12%\n" +
@@ -1239,7 +1247,8 @@ const file_account_proto_rawDesc = "" +
 	"\rmonthly_limit\x18\f \x01(\x01R\fmonthlyLimit\x12\x1f\n" +
 	"\vdaily_spent\x18\r \x01(\x01R\n" +
 	"dailySpent\x12#\n" +
-	"\rmonthly_spent\x18\x0e \x01(\x01R\fmonthlySpent\"G\n" +
+	"\rmonthly_spent\x18\x0e \x01(\x01R\fmonthlySpent\x127\n" +
+	"\fcompany_data\x18\x0f \x01(\v2\x14.account.CompanyDataR\vcompanyData\"G\n" +
 	"\x12GetAccountResponse\x121\n" +
 	"\aaccount\x18\x01 \x01(\v2\x17.account.AccountDetailsR\aaccount\"k\n" +
 	"\x14RenameAccountRequest\x12\x1d\n" +
@@ -1314,25 +1323,26 @@ var file_account_proto_depIdxs = []int32{
 	0,  // 0: account.CreateAccountRequest.company_data:type_name -> account.CompanyData
 	2,  // 1: account.CreateAccountResponse.account:type_name -> account.AccountResponse
 	5,  // 2: account.GetMyAccountsResponse.accounts:type_name -> account.AccountSummary
-	8,  // 3: account.GetAccountResponse.account:type_name -> account.AccountDetails
-	15, // 4: account.GetAllAccountsResponse.accounts:type_name -> account.AccountListItem
-	1,  // 5: account.AccountService.CreateAccount:input_type -> account.CreateAccountRequest
-	4,  // 6: account.AccountService.GetMyAccounts:input_type -> account.GetMyAccountsRequest
-	7,  // 7: account.AccountService.GetAccount:input_type -> account.GetAccountRequest
-	10, // 8: account.AccountService.RenameAccount:input_type -> account.RenameAccountRequest
-	14, // 9: account.AccountService.GetAllAccounts:input_type -> account.GetAllAccountsRequest
-	12, // 10: account.AccountService.UpdateAccountLimits:input_type -> account.UpdateAccountLimitsRequest
-	3,  // 11: account.AccountService.CreateAccount:output_type -> account.CreateAccountResponse
-	6,  // 12: account.AccountService.GetMyAccounts:output_type -> account.GetMyAccountsResponse
-	9,  // 13: account.AccountService.GetAccount:output_type -> account.GetAccountResponse
-	11, // 14: account.AccountService.RenameAccount:output_type -> account.RenameAccountResponse
-	16, // 15: account.AccountService.GetAllAccounts:output_type -> account.GetAllAccountsResponse
-	13, // 16: account.AccountService.UpdateAccountLimits:output_type -> account.UpdateAccountLimitsResponse
-	11, // [11:17] is the sub-list for method output_type
-	5,  // [5:11] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	0,  // 3: account.AccountDetails.company_data:type_name -> account.CompanyData
+	8,  // 4: account.GetAccountResponse.account:type_name -> account.AccountDetails
+	15, // 5: account.GetAllAccountsResponse.accounts:type_name -> account.AccountListItem
+	1,  // 6: account.AccountService.CreateAccount:input_type -> account.CreateAccountRequest
+	4,  // 7: account.AccountService.GetMyAccounts:input_type -> account.GetMyAccountsRequest
+	7,  // 8: account.AccountService.GetAccount:input_type -> account.GetAccountRequest
+	10, // 9: account.AccountService.RenameAccount:input_type -> account.RenameAccountRequest
+	14, // 10: account.AccountService.GetAllAccounts:input_type -> account.GetAllAccountsRequest
+	12, // 11: account.AccountService.UpdateAccountLimits:input_type -> account.UpdateAccountLimitsRequest
+	3,  // 12: account.AccountService.CreateAccount:output_type -> account.CreateAccountResponse
+	6,  // 13: account.AccountService.GetMyAccounts:output_type -> account.GetMyAccountsResponse
+	9,  // 14: account.AccountService.GetAccount:output_type -> account.GetAccountResponse
+	11, // 15: account.AccountService.RenameAccount:output_type -> account.RenameAccountResponse
+	16, // 16: account.AccountService.GetAllAccounts:output_type -> account.GetAllAccountsResponse
+	13, // 17: account.AccountService.UpdateAccountLimits:output_type -> account.UpdateAccountLimitsResponse
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
+	6,  // [6:6] is the sub-list for extension type_name
+	6,  // [6:6] is the sub-list for extension extendee
+	0,  // [0:6] is the sub-list for field type_name
 }
 
 func init() { file_account_proto_init() }
