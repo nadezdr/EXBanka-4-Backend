@@ -428,6 +428,7 @@ func TestUpdatePaymentRecipient_InternalError(t *testing.T) {
 
 func TestDeletePaymentRecipient_NotFound(t *testing.T) {
 	s, dbMock, _ := newPaymentServer(t)
+	dbMock.ExpectExec("UPDATE payments SET recipient_id").WillReturnResult(sqlmock.NewResult(0, 0))
 	dbMock.ExpectExec("DELETE FROM payment_recipients").WillReturnResult(sqlmock.NewResult(0, 0))
 
 	_, err := s.DeletePaymentRecipient(context.Background(), &pb.DeletePaymentRecipientRequest{Id: 99, ClientId: 1})
@@ -437,6 +438,7 @@ func TestDeletePaymentRecipient_NotFound(t *testing.T) {
 
 func TestDeletePaymentRecipient_HappyPath(t *testing.T) {
 	s, dbMock, _ := newPaymentServer(t)
+	dbMock.ExpectExec("UPDATE payments SET recipient_id").WillReturnResult(sqlmock.NewResult(0, 0))
 	dbMock.ExpectExec("DELETE FROM payment_recipients").WillReturnResult(sqlmock.NewResult(1, 1))
 
 	_, err := s.DeletePaymentRecipient(context.Background(), &pb.DeletePaymentRecipientRequest{Id: 1, ClientId: 1})
@@ -445,6 +447,7 @@ func TestDeletePaymentRecipient_HappyPath(t *testing.T) {
 
 func TestDeletePaymentRecipient_ExecError(t *testing.T) {
 	s, dbMock, _ := newPaymentServer(t)
+	dbMock.ExpectExec("UPDATE payments SET recipient_id").WillReturnResult(sqlmock.NewResult(0, 0))
 	dbMock.ExpectExec("DELETE FROM payment_recipients").WillReturnError(sql.ErrConnDone)
 	_, err := s.DeletePaymentRecipient(context.Background(), &pb.DeletePaymentRecipientRequest{Id: 1, ClientId: 1})
 	require.Error(t, err)

@@ -111,5 +111,5 @@ func main() {
 	r.POST("/api/mobile/push-token", handlers.RegisterMobilePushToken(authClient))
 	r.DELETE("/api/mobile/push-token", handlers.UnregisterMobilePushToken(authClient))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	r.Run(":8081")
+	r.Run(":8083")
 }

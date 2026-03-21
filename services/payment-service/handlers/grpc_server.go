@@ -208,6 +208,12 @@ func (s *PaymentServer) UpdatePaymentRecipient(ctx context.Context, req *pb.Upda
 }
 
 func (s *PaymentServer) DeletePaymentRecipient(ctx context.Context, req *pb.DeletePaymentRecipientRequest) (*pb.DeletePaymentRecipientResponse, error) {
+	// Nullify FK references in payments before deleting the recipient
+	if _, err := s.DB.ExecContext(ctx,
+		`UPDATE payments SET recipient_id = NULL WHERE recipient_id = $1`,
+		req.Id); err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to remove recipient references: %v", err)
+	}
 	result, err := s.DB.ExecContext(ctx, `
 		DELETE FROM payment_recipients WHERE id = $1 AND client_id = $2`,
 		req.Id, req.ClientId)
