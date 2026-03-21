@@ -306,6 +306,69 @@ func (s *ExchangeServer) ConvertAmount(ctx context.Context, req *pb.ConvertAmoun
 	}, nil
 }
 
+// PreviewConversion calculates a conversion without executing it (issue #23).
+func (s *ExchangeServer) PreviewConversion(ctx context.Context, req *pb.PreviewConversionRequest) (*pb.PreviewConversionResponse, error) {
+	if req.Amount <= 0 {
+		return nil, status.Error(codes.InvalidArgument, "amount must be positive")
+	}
+	from := req.FromCurrency
+	to := req.ToCurrency
+	if from == to {
+		return nil, status.Error(codes.InvalidArgument, "currencies must be different")
+	}
+
+	if err := s.ensureTodayRates(ctx); err != nil {
+		log.Printf("exchange-service: ensureTodayRates: %v", err)
+	}
+
+	getSellingRate := func(code string) (float64, error) {
+		if code == "RSD" {
+			return 1.0, nil
+		}
+		var r float64
+		err := s.DB.QueryRowContext(ctx,
+			`SELECT selling_rate FROM daily_exchange_rates WHERE currency_code = $1 AND date = CURRENT_DATE`,
+			code,
+		).Scan(&r)
+		return r, err
+	}
+
+	fromSelling, err := getSellingRate(from)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "no exchange rate for %s today", from)
+	}
+	toSelling, err := getSellingRate(to)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "no exchange rate for %s today", to)
+	}
+
+	var toAmount, effectiveRate float64
+	switch {
+	case from == "RSD":
+		toAmount = (req.Amount / toSelling) * (1 - commission)
+		effectiveRate = toSelling
+	case to == "RSD":
+		toAmount = req.Amount * fromSelling * (1 - commission)
+		effectiveRate = fromSelling
+	default:
+		rsd := req.Amount * fromSelling * (1 - commission)
+		toAmount = (rsd / toSelling) * (1 - commission)
+		effectiveRate = fromSelling / toSelling
+	}
+
+	toAmount = math.Round(toAmount*100) / 100
+	commissionAmt := math.Round(req.Amount*commission*100) / 100
+
+	return &pb.PreviewConversionResponse{
+		FromCurrency: from,
+		ToCurrency:   to,
+		FromAmount:   req.Amount,
+		ToAmount:     toAmount,
+		Rate:         math.Round(effectiveRate*1e6) / 1e6,
+		Commission:   commissionAmt,
+	}, nil
+}
+
 // GetExchangeHistory returns past exchange transactions for a client.
 func (s *ExchangeServer) GetExchangeHistory(ctx context.Context, req *pb.GetExchangeHistoryRequest) (*pb.GetExchangeHistoryResponse, error) {
 	rows, err := s.DB.QueryContext(ctx, `

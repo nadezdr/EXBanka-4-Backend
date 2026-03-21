@@ -549,6 +549,150 @@ func (x *GetExchangeHistoryResponse) GetTransactions() []*ExchangeTransaction {
 	return nil
 }
 
+type PreviewConversionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromCurrency  string                 `protobuf:"bytes,1,opt,name=from_currency,json=fromCurrency,proto3" json:"from_currency,omitempty"`
+	ToCurrency    string                 `protobuf:"bytes,2,opt,name=to_currency,json=toCurrency,proto3" json:"to_currency,omitempty"`
+	Amount        float64                `protobuf:"fixed64,3,opt,name=amount,proto3" json:"amount,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PreviewConversionRequest) Reset() {
+	*x = PreviewConversionRequest{}
+	mi := &file_exchange_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreviewConversionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreviewConversionRequest) ProtoMessage() {}
+
+func (x *PreviewConversionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_exchange_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreviewConversionRequest.ProtoReflect.Descriptor instead.
+func (*PreviewConversionRequest) Descriptor() ([]byte, []int) {
+	return file_exchange_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *PreviewConversionRequest) GetFromCurrency() string {
+	if x != nil {
+		return x.FromCurrency
+	}
+	return ""
+}
+
+func (x *PreviewConversionRequest) GetToCurrency() string {
+	if x != nil {
+		return x.ToCurrency
+	}
+	return ""
+}
+
+func (x *PreviewConversionRequest) GetAmount() float64 {
+	if x != nil {
+		return x.Amount
+	}
+	return 0
+}
+
+type PreviewConversionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromCurrency  string                 `protobuf:"bytes,1,opt,name=from_currency,json=fromCurrency,proto3" json:"from_currency,omitempty"`
+	ToCurrency    string                 `protobuf:"bytes,2,opt,name=to_currency,json=toCurrency,proto3" json:"to_currency,omitempty"`
+	FromAmount    float64                `protobuf:"fixed64,3,opt,name=from_amount,json=fromAmount,proto3" json:"from_amount,omitempty"`
+	ToAmount      float64                `protobuf:"fixed64,4,opt,name=to_amount,json=toAmount,proto3" json:"to_amount,omitempty"`
+	Rate          float64                `protobuf:"fixed64,5,opt,name=rate,proto3" json:"rate,omitempty"`
+	Commission    float64                `protobuf:"fixed64,6,opt,name=commission,proto3" json:"commission,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PreviewConversionResponse) Reset() {
+	*x = PreviewConversionResponse{}
+	mi := &file_exchange_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreviewConversionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreviewConversionResponse) ProtoMessage() {}
+
+func (x *PreviewConversionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_exchange_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreviewConversionResponse.ProtoReflect.Descriptor instead.
+func (*PreviewConversionResponse) Descriptor() ([]byte, []int) {
+	return file_exchange_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *PreviewConversionResponse) GetFromCurrency() string {
+	if x != nil {
+		return x.FromCurrency
+	}
+	return ""
+}
+
+func (x *PreviewConversionResponse) GetToCurrency() string {
+	if x != nil {
+		return x.ToCurrency
+	}
+	return ""
+}
+
+func (x *PreviewConversionResponse) GetFromAmount() float64 {
+	if x != nil {
+		return x.FromAmount
+	}
+	return 0
+}
+
+func (x *PreviewConversionResponse) GetToAmount() float64 {
+	if x != nil {
+		return x.ToAmount
+	}
+	return 0
+}
+
+func (x *PreviewConversionResponse) GetRate() float64 {
+	if x != nil {
+		return x.Rate
+	}
+	return 0
+}
+
+func (x *PreviewConversionResponse) GetCommission() float64 {
+	if x != nil {
+		return x.Commission
+	}
+	return 0
+}
+
 var File_exchange_proto protoreflect.FileDescriptor
 
 const file_exchange_proto_rawDesc = "" +
@@ -604,11 +748,28 @@ const file_exchange_proto_rawDesc = "" +
 	" \x01(\tR\ttimestamp\x12\x16\n" +
 	"\x06status\x18\v \x01(\tR\x06status\"_\n" +
 	"\x1aGetExchangeHistoryResponse\x12A\n" +
-	"\ftransactions\x18\x01 \x03(\v2\x1d.exchange.ExchangeTransactionR\ftransactions2\x9f\x02\n" +
+	"\ftransactions\x18\x01 \x03(\v2\x1d.exchange.ExchangeTransactionR\ftransactions\"x\n" +
+	"\x18PreviewConversionRequest\x12#\n" +
+	"\rfrom_currency\x18\x01 \x01(\tR\ffromCurrency\x12\x1f\n" +
+	"\vto_currency\x18\x02 \x01(\tR\n" +
+	"toCurrency\x12\x16\n" +
+	"\x06amount\x18\x03 \x01(\x01R\x06amount\"\xd3\x01\n" +
+	"\x19PreviewConversionResponse\x12#\n" +
+	"\rfrom_currency\x18\x01 \x01(\tR\ffromCurrency\x12\x1f\n" +
+	"\vto_currency\x18\x02 \x01(\tR\n" +
+	"toCurrency\x12\x1f\n" +
+	"\vfrom_amount\x18\x03 \x01(\x01R\n" +
+	"fromAmount\x12\x1b\n" +
+	"\tto_amount\x18\x04 \x01(\x01R\btoAmount\x12\x12\n" +
+	"\x04rate\x18\x05 \x01(\x01R\x04rate\x12\x1e\n" +
+	"\n" +
+	"commission\x18\x06 \x01(\x01R\n" +
+	"commission2\xfd\x02\n" +
 	"\x0fExchangeService\x12Y\n" +
 	"\x10GetExchangeRates\x12!.exchange.GetExchangeRatesRequest\x1a\".exchange.GetExchangeRatesResponse\x12P\n" +
 	"\rConvertAmount\x12\x1e.exchange.ConvertAmountRequest\x1a\x1f.exchange.ConvertAmountResponse\x12_\n" +
-	"\x12GetExchangeHistory\x12#.exchange.GetExchangeHistoryRequest\x1a$.exchange.GetExchangeHistoryResponseB=Z;github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/exchangeb\x06proto3"
+	"\x12GetExchangeHistory\x12#.exchange.GetExchangeHistoryRequest\x1a$.exchange.GetExchangeHistoryResponse\x12\\\n" +
+	"\x11PreviewConversion\x12\".exchange.PreviewConversionRequest\x1a#.exchange.PreviewConversionResponseB=Z;github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/exchangeb\x06proto3"
 
 var (
 	file_exchange_proto_rawDescOnce sync.Once
@@ -622,7 +783,7 @@ func file_exchange_proto_rawDescGZIP() []byte {
 	return file_exchange_proto_rawDescData
 }
 
-var file_exchange_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_exchange_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_exchange_proto_goTypes = []any{
 	(*GetExchangeRatesRequest)(nil),    // 0: exchange.GetExchangeRatesRequest
 	(*ExchangeRate)(nil),               // 1: exchange.ExchangeRate
@@ -632,6 +793,8 @@ var file_exchange_proto_goTypes = []any{
 	(*GetExchangeHistoryRequest)(nil),  // 5: exchange.GetExchangeHistoryRequest
 	(*ExchangeTransaction)(nil),        // 6: exchange.ExchangeTransaction
 	(*GetExchangeHistoryResponse)(nil), // 7: exchange.GetExchangeHistoryResponse
+	(*PreviewConversionRequest)(nil),   // 8: exchange.PreviewConversionRequest
+	(*PreviewConversionResponse)(nil),  // 9: exchange.PreviewConversionResponse
 }
 var file_exchange_proto_depIdxs = []int32{
 	1, // 0: exchange.GetExchangeRatesResponse.rates:type_name -> exchange.ExchangeRate
@@ -639,11 +802,13 @@ var file_exchange_proto_depIdxs = []int32{
 	0, // 2: exchange.ExchangeService.GetExchangeRates:input_type -> exchange.GetExchangeRatesRequest
 	3, // 3: exchange.ExchangeService.ConvertAmount:input_type -> exchange.ConvertAmountRequest
 	5, // 4: exchange.ExchangeService.GetExchangeHistory:input_type -> exchange.GetExchangeHistoryRequest
-	2, // 5: exchange.ExchangeService.GetExchangeRates:output_type -> exchange.GetExchangeRatesResponse
-	4, // 6: exchange.ExchangeService.ConvertAmount:output_type -> exchange.ConvertAmountResponse
-	7, // 7: exchange.ExchangeService.GetExchangeHistory:output_type -> exchange.GetExchangeHistoryResponse
-	5, // [5:8] is the sub-list for method output_type
-	2, // [2:5] is the sub-list for method input_type
+	8, // 5: exchange.ExchangeService.PreviewConversion:input_type -> exchange.PreviewConversionRequest
+	2, // 6: exchange.ExchangeService.GetExchangeRates:output_type -> exchange.GetExchangeRatesResponse
+	4, // 7: exchange.ExchangeService.ConvertAmount:output_type -> exchange.ConvertAmountResponse
+	7, // 8: exchange.ExchangeService.GetExchangeHistory:output_type -> exchange.GetExchangeHistoryResponse
+	9, // 9: exchange.ExchangeService.PreviewConversion:output_type -> exchange.PreviewConversionResponse
+	6, // [6:10] is the sub-list for method output_type
+	2, // [2:6] is the sub-list for method input_type
 	2, // [2:2] is the sub-list for extension type_name
 	2, // [2:2] is the sub-list for extension extendee
 	0, // [0:2] is the sub-list for field type_name
@@ -660,7 +825,7 @@ func file_exchange_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_exchange_proto_rawDesc), len(file_exchange_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

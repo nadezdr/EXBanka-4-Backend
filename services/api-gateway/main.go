@@ -120,6 +120,7 @@ func main() {
 	r.GET("/exchange/rate", handlers.GetExchangeRate(exchangeClient))
 	r.POST("/exchange/convert", handlers.ConvertAmount(exchangeClient))
 	r.GET("/exchange/history", handlers.GetExchangeHistory(exchangeClient))
+	r.POST("/exchange/preview", handlers.PreviewConversion(exchangeClient))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(":8083")
 }

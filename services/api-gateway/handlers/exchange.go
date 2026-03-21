@@ -200,6 +200,59 @@ func ConvertAmount(client pb.ExchangeServiceClient) gin.HandlerFunc {
 	}
 }
 
+// PreviewConversion godoc
+// @Summary      Preview currency conversion (no execution)
+// @Tags         exchange
+// @Accept       json
+// @Produce      json
+// @Param        body  body  object  true  "Preview request"
+// @Success      200   {object}  map[string]interface{}
+// @Router       /exchange/preview [post]
+func PreviewConversion(client pb.ExchangeServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if _, err := middleware.GetUserIDFromToken(c); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "could not extract identity from token"})
+			return
+		}
+		var req struct {
+			FromCurrency string  `json:"fromCurrency" binding:"required"`
+			ToCurrency   string  `json:"toCurrency"   binding:"required"`
+			Amount       float64 `json:"amount"       binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		resp, err := client.PreviewConversion(ctx, &pb.PreviewConversionRequest{
+			FromCurrency: strings.ToUpper(req.FromCurrency),
+			ToCurrency:   strings.ToUpper(req.ToCurrency),
+			Amount:       req.Amount,
+		})
+		if err != nil {
+			switch status.Code(err) {
+			case codes.InvalidArgument:
+				c.JSON(http.StatusBadRequest, gin.H{"error": status.Convert(err).Message()})
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": status.Convert(err).Message()})
+			}
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"fromCurrency": resp.FromCurrency,
+			"toCurrency":   resp.ToCurrency,
+			"fromAmount":   resp.FromAmount,
+			"toAmount":     resp.ToAmount,
+			"rate":         resp.Rate,
+			"commission":   resp.Commission,
+		})
+	}
+}
+
 // GetExchangeHistory godoc
 // @Summary      Get client's exchange transaction history
 // @Tags         exchange

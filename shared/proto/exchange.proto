@@ -63,8 +63,26 @@ message GetExchangeHistoryResponse {
   repeated ExchangeTransaction transactions = 1;
 }
 
+// --- PreviewConversion ---
+
+message PreviewConversionRequest {
+  string from_currency = 1;
+  string to_currency   = 2;
+  double amount        = 3;
+}
+
+message PreviewConversionResponse {
+  string from_currency = 1;
+  string to_currency   = 2;
+  double from_amount   = 3;
+  double to_amount     = 4;
+  double rate          = 5;
+  double commission    = 6;
+}
+
 service ExchangeService {
-  rpc GetExchangeRates   (GetExchangeRatesRequest)   returns (GetExchangeRatesResponse);
-  rpc ConvertAmount      (ConvertAmountRequest)       returns (ConvertAmountResponse);
-  rpc GetExchangeHistory (GetExchangeHistoryRequest)  returns (GetExchangeHistoryResponse);
+  rpc GetExchangeRates      (GetExchangeRatesRequest)      returns (GetExchangeRatesResponse);
+  rpc ConvertAmount         (ConvertAmountRequest)          returns (ConvertAmountResponse);
+  rpc GetExchangeHistory    (GetExchangeHistoryRequest)     returns (GetExchangeHistoryResponse);
+  rpc PreviewConversion     (PreviewConversionRequest)      returns (PreviewConversionResponse);
 }

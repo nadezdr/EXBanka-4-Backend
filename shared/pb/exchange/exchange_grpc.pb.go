@@ -22,6 +22,7 @@ const (
 	ExchangeService_GetExchangeRates_FullMethodName   = "/exchange.ExchangeService/GetExchangeRates"
 	ExchangeService_ConvertAmount_FullMethodName      = "/exchange.ExchangeService/ConvertAmount"
 	ExchangeService_GetExchangeHistory_FullMethodName = "/exchange.ExchangeService/GetExchangeHistory"
+	ExchangeService_PreviewConversion_FullMethodName  = "/exchange.ExchangeService/PreviewConversion"
 )
 
 // ExchangeServiceClient is the client API for ExchangeService service.
@@ -31,6 +32,7 @@ type ExchangeServiceClient interface {
 	GetExchangeRates(ctx context.Context, in *GetExchangeRatesRequest, opts ...grpc.CallOption) (*GetExchangeRatesResponse, error)
 	ConvertAmount(ctx context.Context, in *ConvertAmountRequest, opts ...grpc.CallOption) (*ConvertAmountResponse, error)
 	GetExchangeHistory(ctx context.Context, in *GetExchangeHistoryRequest, opts ...grpc.CallOption) (*GetExchangeHistoryResponse, error)
+	PreviewConversion(ctx context.Context, in *PreviewConversionRequest, opts ...grpc.CallOption) (*PreviewConversionResponse, error)
 }
 
 type exchangeServiceClient struct {
@@ -71,6 +73,16 @@ func (c *exchangeServiceClient) GetExchangeHistory(ctx context.Context, in *GetE
 	return out, nil
 }
 
+func (c *exchangeServiceClient) PreviewConversion(ctx context.Context, in *PreviewConversionRequest, opts ...grpc.CallOption) (*PreviewConversionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreviewConversionResponse)
+	err := c.cc.Invoke(ctx, ExchangeService_PreviewConversion_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ExchangeServiceServer is the server API for ExchangeService service.
 // All implementations must embed UnimplementedExchangeServiceServer
 // for forward compatibility.
@@ -78,6 +90,7 @@ type ExchangeServiceServer interface {
 	GetExchangeRates(context.Context, *GetExchangeRatesRequest) (*GetExchangeRatesResponse, error)
 	ConvertAmount(context.Context, *ConvertAmountRequest) (*ConvertAmountResponse, error)
 	GetExchangeHistory(context.Context, *GetExchangeHistoryRequest) (*GetExchangeHistoryResponse, error)
+	PreviewConversion(context.Context, *PreviewConversionRequest) (*PreviewConversionResponse, error)
 	mustEmbedUnimplementedExchangeServiceServer()
 }
 
@@ -96,6 +109,9 @@ func (UnimplementedExchangeServiceServer) ConvertAmount(context.Context, *Conver
 }
 func (UnimplementedExchangeServiceServer) GetExchangeHistory(context.Context, *GetExchangeHistoryRequest) (*GetExchangeHistoryResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetExchangeHistory not implemented")
+}
+func (UnimplementedExchangeServiceServer) PreviewConversion(context.Context, *PreviewConversionRequest) (*PreviewConversionResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method PreviewConversion not implemented")
 }
 func (UnimplementedExchangeServiceServer) mustEmbedUnimplementedExchangeServiceServer() {}
 func (UnimplementedExchangeServiceServer) testEmbeddedByValue()                         {}
@@ -172,6 +188,24 @@ func _ExchangeService_GetExchangeHistory_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ExchangeService_PreviewConversion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreviewConversionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ExchangeServiceServer).PreviewConversion(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ExchangeService_PreviewConversion_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ExchangeServiceServer).PreviewConversion(ctx, req.(*PreviewConversionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ExchangeService_ServiceDesc is the grpc.ServiceDesc for ExchangeService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -190,6 +224,10 @@ var ExchangeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetExchangeHistory",
 			Handler:    _ExchangeService_GetExchangeHistory_Handler,
+		},
+		{
+			MethodName: "PreviewConversion",
+			Handler:    _ExchangeService_PreviewConversion_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
