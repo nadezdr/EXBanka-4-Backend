@@ -64,20 +64,21 @@ message GetAccountRequest {
 }
 
 message AccountDetails {
-  int64  id                = 1;
-  string account_name      = 2;
-  string account_number    = 3;
-  string owner             = 4;
-  double balance           = 5;
-  double available_balance = 6;
-  double reserved_funds    = 7;
-  string currency_code     = 8;
-  string status            = 9;
-  string account_type      = 10;
-  double daily_limit       = 11;
-  double monthly_limit     = 12;
-  double daily_spent       = 13;
-  double monthly_spent     = 14;
+  int64       id                = 1;
+  string      account_name      = 2;
+  string      account_number    = 3;
+  string      owner             = 4;
+  double      balance           = 5;
+  double      available_balance = 6;
+  double      reserved_funds    = 7;
+  string      currency_code     = 8;
+  string      status            = 9;
+  string      account_type      = 10;
+  double      daily_limit       = 11;
+  double      monthly_limit     = 12;
+  double      daily_spent       = 13;
+  double      monthly_spent     = 14;
+  CompanyData company_data      = 15;
 }
 
 message GetAccountResponse {

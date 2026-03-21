@@ -113,7 +113,7 @@ func GetAccount(accountClient pb.AccountServiceClient) gin.HandlerFunc {
 			return
 		}
 		a := resp.Account
-		c.JSON(http.StatusOK, gin.H{
+		body := gin.H{
 			"accountName":      a.AccountName,
 			"accountNumber":    a.AccountNumber,
 			"owner":            a.Owner,
@@ -127,7 +127,78 @@ func GetAccount(accountClient pb.AccountServiceClient) gin.HandlerFunc {
 			"monthlyLimit":     a.MonthlyLimit,
 			"dailySpent":       a.DailySpent,
 			"monthlySpent":     a.MonthlySpent,
-		})
+		}
+		if a.CompanyData != nil {
+			body["company"] = gin.H{
+				"name":               a.CompanyData.Name,
+				"registrationNumber": a.CompanyData.RegistrationNumber,
+				"pib":                a.CompanyData.Pib,
+				"activityCode":       a.CompanyData.ActivityCode,
+				"address":            a.CompanyData.Address,
+			}
+		}
+		c.JSON(http.StatusOK, body)
+	}
+}
+
+// GetAccountAdmin godoc
+// @Summary      Get account details (employee)
+// @Description  Returns full account details for any account. Requires employee authentication.
+// @Tags         accounts
+// @Produce      json
+// @Param        accountId  path      int  true  "Account ID"
+// @Success      200        {object}  map[string]interface{}
+// @Failure      404        {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/admin/accounts/{accountId} [get]
+func GetAccountAdmin(accountClient pb.AccountServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		accountID, err := parseID(c, "accountId")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid accountId"})
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+
+		// OwnerId=0 bypasses the ownership check in account-service
+		resp, err := accountClient.GetAccount(ctx, &pb.GetAccountRequest{AccountId: accountID, OwnerId: 0})
+		if err != nil {
+			switch status.Code(err) {
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			}
+			return
+		}
+		a := resp.Account
+		body := gin.H{
+			"accountName":      a.AccountName,
+			"accountNumber":    a.AccountNumber,
+			"owner":            a.Owner,
+			"balance":          a.Balance,
+			"availableBalance": a.AvailableBalance,
+			"reservedFunds":    a.ReservedFunds,
+			"currency":         a.CurrencyCode,
+			"status":           a.Status,
+			"accountType":      a.AccountType,
+			"dailyLimit":       a.DailyLimit,
+			"monthlyLimit":     a.MonthlyLimit,
+			"dailySpent":       a.DailySpent,
+			"monthlySpent":     a.MonthlySpent,
+		}
+		if a.CompanyData != nil {
+			body["company"] = gin.H{
+				"name":               a.CompanyData.Name,
+				"registrationNumber": a.CompanyData.RegistrationNumber,
+				"pib":                a.CompanyData.Pib,
+				"activityCode":       a.CompanyData.ActivityCode,
+				"address":            a.CompanyData.Address,
+			}
+		}
+		c.JSON(http.StatusOK, body)
 	}
 }
 
@@ -226,6 +297,59 @@ func GetAllAccounts(accountClient pb.AccountServiceClient) gin.HandlerFunc {
 			})
 		}
 		c.JSON(http.StatusOK, result)
+	}
+}
+
+// UpdateAccountLimits godoc
+// @Summary      Update account limits
+// @Description  Sets the daily and monthly spending limits for an account. Requires employee authentication.
+// @Tags         accounts
+// @Accept       json
+// @Produce      json
+// @Param        accountId  path      int                    true  "Account ID"
+// @Param        body       body      map[string]number      true  "Limits"
+// @Success      200        {object}  map[string]string
+// @Failure      400        {object}  map[string]string
+// @Failure      404        {object}  map[string]string
+// @Security     BearerAuth
+// @Router       /api/accounts/{accountId}/limits [put]
+func UpdateAccountLimits(accountClient pb.AccountServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		accountID, err := parseID(c, "accountId")
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid accountId"})
+			return
+		}
+
+		var body struct {
+			DailyLimit   float64 `json:"dailyLimit"   binding:"required"`
+			MonthlyLimit float64 `json:"monthlyLimit" binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "dailyLimit and monthlyLimit are required"})
+			return
+		}
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+
+		// OwnerId=0 signals employee/admin access — no ownership check in account-service
+		_, err = accountClient.UpdateAccountLimits(ctx, &pb.UpdateAccountLimitsRequest{
+			AccountId:    accountID,
+			OwnerId:      0,
+			DailyLimit:   body.DailyLimit,
+			MonthlyLimit: body.MonthlyLimit,
+		})
+		if err != nil {
+			switch status.Code(err) {
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			}
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "limits updated successfully"})
 	}
 }
 
