@@ -146,6 +146,7 @@ func main() {
 	r.GET("/cards", handlers.GetMyCards(accountClient, cardClient))
 	r.POST("/cards/request", handlers.InitiateCardRequest(cardClient, clientClient, emailClient))
 	r.POST("/cards/request/confirm", handlers.ConfirmCardRequest(cardClient))
+	r.GET("/cards/id/:id", handlers.GetCardById(cardClient))
 	r.GET("/cards/:number", handlers.GetCardByNumber(cardClient))
 	r.PUT("/cards/:number/block", handlers.BlockCard(cardClient))
 	r.PUT("/cards/:number/unblock", middleware.RequireRole("EMPLOYEE"), handlers.UnblockCard(cardClient))

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -65,6 +66,41 @@ func GetMyCards(accountClient pbaccount.AccountServiceClient, cardClient pbcard.
 			cards = []gin.H{}
 		}
 		c.JSON(http.StatusOK, cards)
+	}
+}
+
+// GetCardById godoc
+// @Summary  Get details of a specific card by database ID
+// @Tags     cards
+// @Produce  json
+// @Param    id  path  int  true  "Card ID"
+// @Success  200  {object}  map[string]interface{}
+// @Router   /cards/id/{id} [get]
+func GetCardById(cardClient pbcard.CardServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if _, err := middleware.GetUserIDFromToken(c); err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "could not extract identity from token"})
+			return
+		}
+		var id int64
+		if _, err := fmt.Sscanf(c.Param("id"), "%d", &id); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid card id"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		resp, err := cardClient.GetCardById(ctx, &pbcard.GetCardByIdRequest{Id: id})
+		if err != nil {
+			switch status.Code(err) {
+			case codes.NotFound:
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+			default:
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch card"})
+			}
+			return
+		}
+		c.JSON(http.StatusOK, cardToJSON(resp.Card))
 	}
 }
 

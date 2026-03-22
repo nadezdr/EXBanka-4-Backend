@@ -189,6 +189,24 @@ func (s *CardServer) GetCardByNumber(ctx context.Context, req *pb.GetCardByNumbe
 	return &pb.GetCardByNumberResponse{Card: c}, nil
 }
 
+// ── GetCardById ───────────────────────────────────────────────────────────────
+
+func (s *CardServer) GetCardById(ctx context.Context, req *pb.GetCardByIdRequest) (*pb.GetCardByIdResponse, error) {
+	row := s.DB.QueryRowContext(ctx, `
+		SELECT id, card_number, card_type, card_name, expiry_date, account_number, card_limit, status, created_at
+		FROM cards WHERE id = $1`,
+		req.Id,
+	)
+	c, err := scanCard(row)
+	if err == sql.ErrNoRows {
+		return nil, status.Errorf(codes.NotFound, "card %d not found", req.Id)
+	}
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "failed to query card: %v", err)
+	}
+	return &pb.GetCardByIdResponse{Card: c}, nil
+}
+
 // ── BlockCard ─────────────────────────────────────────────────────────────────
 
 func (s *CardServer) BlockCard(ctx context.Context, req *pb.BlockCardRequest) (*pb.BlockCardResponse, error) {

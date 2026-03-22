@@ -22,6 +22,7 @@ const (
 	CardService_CreateCard_FullMethodName          = "/card.CardService/CreateCard"
 	CardService_GetCardsByAccount_FullMethodName   = "/card.CardService/GetCardsByAccount"
 	CardService_GetCardByNumber_FullMethodName     = "/card.CardService/GetCardByNumber"
+	CardService_GetCardById_FullMethodName         = "/card.CardService/GetCardById"
 	CardService_BlockCard_FullMethodName           = "/card.CardService/BlockCard"
 	CardService_UnblockCard_FullMethodName         = "/card.CardService/UnblockCard"
 	CardService_DeactivateCard_FullMethodName      = "/card.CardService/DeactivateCard"
@@ -37,6 +38,7 @@ type CardServiceClient interface {
 	CreateCard(ctx context.Context, in *CreateCardRequest, opts ...grpc.CallOption) (*CreateCardResponse, error)
 	GetCardsByAccount(ctx context.Context, in *GetCardsByAccountRequest, opts ...grpc.CallOption) (*GetCardsByAccountResponse, error)
 	GetCardByNumber(ctx context.Context, in *GetCardByNumberRequest, opts ...grpc.CallOption) (*GetCardByNumberResponse, error)
+	GetCardById(ctx context.Context, in *GetCardByIdRequest, opts ...grpc.CallOption) (*GetCardByIdResponse, error)
 	BlockCard(ctx context.Context, in *BlockCardRequest, opts ...grpc.CallOption) (*BlockCardResponse, error)
 	UnblockCard(ctx context.Context, in *UnblockCardRequest, opts ...grpc.CallOption) (*UnblockCardResponse, error)
 	DeactivateCard(ctx context.Context, in *DeactivateCardRequest, opts ...grpc.CallOption) (*DeactivateCardResponse, error)
@@ -77,6 +79,16 @@ func (c *cardServiceClient) GetCardByNumber(ctx context.Context, in *GetCardByNu
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetCardByNumberResponse)
 	err := c.cc.Invoke(ctx, CardService_GetCardByNumber_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cardServiceClient) GetCardById(ctx context.Context, in *GetCardByIdRequest, opts ...grpc.CallOption) (*GetCardByIdResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCardByIdResponse)
+	err := c.cc.Invoke(ctx, CardService_GetCardById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,6 +162,7 @@ type CardServiceServer interface {
 	CreateCard(context.Context, *CreateCardRequest) (*CreateCardResponse, error)
 	GetCardsByAccount(context.Context, *GetCardsByAccountRequest) (*GetCardsByAccountResponse, error)
 	GetCardByNumber(context.Context, *GetCardByNumberRequest) (*GetCardByNumberResponse, error)
+	GetCardById(context.Context, *GetCardByIdRequest) (*GetCardByIdResponse, error)
 	BlockCard(context.Context, *BlockCardRequest) (*BlockCardResponse, error)
 	UnblockCard(context.Context, *UnblockCardRequest) (*UnblockCardResponse, error)
 	DeactivateCard(context.Context, *DeactivateCardRequest) (*DeactivateCardResponse, error)
@@ -174,6 +187,9 @@ func (UnimplementedCardServiceServer) GetCardsByAccount(context.Context, *GetCar
 }
 func (UnimplementedCardServiceServer) GetCardByNumber(context.Context, *GetCardByNumberRequest) (*GetCardByNumberResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetCardByNumber not implemented")
+}
+func (UnimplementedCardServiceServer) GetCardById(context.Context, *GetCardByIdRequest) (*GetCardByIdResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetCardById not implemented")
 }
 func (UnimplementedCardServiceServer) BlockCard(context.Context, *BlockCardRequest) (*BlockCardResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method BlockCard not implemented")
@@ -264,6 +280,24 @@ func _CardService_GetCardByNumber_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(CardServiceServer).GetCardByNumber(ctx, req.(*GetCardByNumberRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CardService_GetCardById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCardByIdRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CardServiceServer).GetCardById(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: CardService_GetCardById_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CardServiceServer).GetCardById(ctx, req.(*GetCardByIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -394,6 +428,10 @@ var CardService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetCardByNumber",
 			Handler:    _CardService_GetCardByNumber_Handler,
+		},
+		{
+			MethodName: "GetCardById",
+			Handler:    _CardService_GetCardById_Handler,
 		},
 		{
 			MethodName: "BlockCard",
