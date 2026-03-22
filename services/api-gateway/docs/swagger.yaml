@@ -738,6 +738,90 @@ paths:
       summary: Get all cards for the authenticated client
       tags:
       - cards
+  /api/cards/{id}/block:
+    put:
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Block a card (client — own card only)
+      tags:
+      - cards
+  /api/cards/{id}/deactivate:
+    put:
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Deactivate a card permanently (employee only)
+      tags:
+      - cards
+  /api/cards/{id}/limit:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New limit
+        in: body
+        name: body
+        required: true
+        schema:
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update card spending limit (employee only)
+      tags:
+      - cards
+  /api/cards/{id}/unblock:
+    put:
+      parameters:
+      - description: Card ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Unblock a card (employee only)
+      tags:
+      - cards
   /api/cards/{number}:
     get:
       parameters:
@@ -757,12 +841,12 @@ paths:
       summary: Get details of a specific card
       tags:
       - cards
-  /api/cards/{number}/block:
-    put:
+  /api/cards/by-account/{accountNumber}:
+    get:
       parameters:
-      - description: Card number
+      - description: Account number
         in: path
-        name: number
+        name: accountNumber
         required: true
         type: string
       produces:
@@ -771,74 +855,11 @@ paths:
         "200":
           description: OK
           schema:
-            additionalProperties: true
-            type: object
-      summary: Block a card (client — own card only)
-      tags:
-      - cards
-  /api/cards/{number}/deactivate:
-    put:
-      parameters:
-      - description: Card number
-        in: path
-        name: number
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Deactivate a card permanently (employee only)
-      tags:
-      - cards
-  /api/cards/{number}/limit:
-    put:
-      consumes:
-      - application/json
-      parameters:
-      - description: Card number
-        in: path
-        name: number
-        required: true
-        type: string
-      - description: New limit
-        in: body
-        name: body
-        required: true
-        schema:
-          type: object
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Update card spending limit (employee only)
-      tags:
-      - cards
-  /api/cards/{number}/unblock:
-    put:
-      parameters:
-      - description: Card number
-        in: path
-        name: number
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            additionalProperties: true
-            type: object
-      summary: Unblock a card (employee only)
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+      summary: Get all cards for a given account (employee only)
       tags:
       - cards
   /api/cards/id/{id}:

@@ -583,6 +583,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/cards/by-account/{accountNumber}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get all cards for a given account (employee only)",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Account number",
+                        "name": "accountNumber",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/cards/id/{id}": {
             "get": {
                 "produces": [
@@ -680,36 +712,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/cards/{number}": {
-            "get": {
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "cards"
-                ],
-                "summary": "Get details of a specific card",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Card number",
-                        "name": "number",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": true
-                        }
-                    }
-                }
-            }
-        },
-        "/api/cards/{number}/block": {
+        "/api/cards/{id}/block": {
             "put": {
                 "produces": [
                     "application/json"
@@ -720,9 +723,9 @@ const docTemplate = `{
                 "summary": "Block a card (client — own card only)",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Card number",
-                        "name": "number",
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -738,7 +741,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/cards/{number}/deactivate": {
+        "/api/cards/{id}/deactivate": {
             "put": {
                 "produces": [
                     "application/json"
@@ -749,9 +752,9 @@ const docTemplate = `{
                 "summary": "Deactivate a card permanently (employee only)",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Card number",
-                        "name": "number",
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     }
@@ -767,7 +770,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/cards/{number}/limit": {
+        "/api/cards/{id}/limit": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -781,9 +784,9 @@ const docTemplate = `{
                 "summary": "Update card spending limit (employee only)",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "Card number",
-                        "name": "number",
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "id",
                         "in": "path",
                         "required": true
                     },
@@ -808,7 +811,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/cards/{number}/unblock": {
+        "/api/cards/{id}/unblock": {
             "put": {
                 "produces": [
                     "application/json"
@@ -817,6 +820,35 @@ const docTemplate = `{
                     "cards"
                 ],
                 "summary": "Unblock a card (employee only)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Card ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/cards/{number}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cards"
+                ],
+                "summary": "Get details of a specific card",
                 "parameters": [
                     {
                         "type": "string",
