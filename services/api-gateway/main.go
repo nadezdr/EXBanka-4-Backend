@@ -153,7 +153,7 @@ func main() {
 	r.GET("/api/cards/by-account/:accountNumber", middleware.RequireRole("EMPLOYEE"), handlers.GetCardsByAccount(cardClient))
 	r.POST("/api/cards/request", handlers.InitiateCardRequest(cardClient, clientClient, emailClient))
 	r.POST("/api/cards/request/confirm", handlers.ConfirmCardRequest(cardClient))
-	r.GET("/api/cards/id/:id", handlers.GetCardById(cardClient))
+	r.GET("/api/cards/id/:id", handlers.GetCardById(accountClient, cardClient))
 	r.GET("/api/cards/:number", handlers.GetCardByNumber(cardClient))
 	r.PUT("/api/cards/:id/block", handlers.BlockCard(cardClient))
 	r.PUT("/api/cards/:id/unblock", middleware.RequireRole("EMPLOYEE"), handlers.UnblockCard(cardClient))
