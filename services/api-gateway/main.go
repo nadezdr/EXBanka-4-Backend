@@ -148,6 +148,7 @@ func main() {
 	r.PUT("/admin/loans/:id/approve", middleware.RequireRole("ADMIN"), handlers.ApproveLoan(loanClient))
 	r.PUT("/admin/loans/:id/reject", middleware.RequireRole("ADMIN"), handlers.RejectLoan(loanClient))
 	r.GET("/admin/loans", middleware.RequireRole("ADMIN"), handlers.GetAllLoans(loanClient))
+	r.POST("/admin/loans/trigger-installments", middleware.RequireRole("ADMIN"), handlers.TriggerInstallments(loanClient))
 	r.GET("/api/cards", handlers.GetMyCards(accountClient, cardClient))
 	r.GET("/api/cards/by-account/:accountNumber", middleware.RequireRole("EMPLOYEE"), handlers.GetCardsByAccount(cardClient))
 	r.POST("/api/cards/request", handlers.InitiateCardRequest(cardClient, clientClient, emailClient))

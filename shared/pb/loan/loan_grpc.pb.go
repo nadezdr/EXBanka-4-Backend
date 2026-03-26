@@ -27,6 +27,7 @@ const (
 	LoanService_RejectLoan_FullMethodName             = "/loan.LoanService/RejectLoan"
 	LoanService_GetAllLoanApplications_FullMethodName = "/loan.LoanService/GetAllLoanApplications"
 	LoanService_GetAllLoans_FullMethodName            = "/loan.LoanService/GetAllLoans"
+	LoanService_TriggerInstallments_FullMethodName    = "/loan.LoanService/TriggerInstallments"
 )
 
 // LoanServiceClient is the client API for LoanService service.
@@ -41,6 +42,7 @@ type LoanServiceClient interface {
 	RejectLoan(ctx context.Context, in *RejectLoanRequest, opts ...grpc.CallOption) (*RejectLoanResponse, error)
 	GetAllLoanApplications(ctx context.Context, in *GetAllLoanApplicationsRequest, opts ...grpc.CallOption) (*GetAllLoanApplicationsResponse, error)
 	GetAllLoans(ctx context.Context, in *GetAllLoansRequest, opts ...grpc.CallOption) (*GetAllLoansResponse, error)
+	TriggerInstallments(ctx context.Context, in *TriggerInstallmentsRequest, opts ...grpc.CallOption) (*TriggerInstallmentsResponse, error)
 }
 
 type loanServiceClient struct {
@@ -131,6 +133,16 @@ func (c *loanServiceClient) GetAllLoans(ctx context.Context, in *GetAllLoansRequ
 	return out, nil
 }
 
+func (c *loanServiceClient) TriggerInstallments(ctx context.Context, in *TriggerInstallmentsRequest, opts ...grpc.CallOption) (*TriggerInstallmentsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TriggerInstallmentsResponse)
+	err := c.cc.Invoke(ctx, LoanService_TriggerInstallments_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LoanServiceServer is the server API for LoanService service.
 // All implementations must embed UnimplementedLoanServiceServer
 // for forward compatibility.
@@ -143,6 +155,7 @@ type LoanServiceServer interface {
 	RejectLoan(context.Context, *RejectLoanRequest) (*RejectLoanResponse, error)
 	GetAllLoanApplications(context.Context, *GetAllLoanApplicationsRequest) (*GetAllLoanApplicationsResponse, error)
 	GetAllLoans(context.Context, *GetAllLoansRequest) (*GetAllLoansResponse, error)
+	TriggerInstallments(context.Context, *TriggerInstallmentsRequest) (*TriggerInstallmentsResponse, error)
 	mustEmbedUnimplementedLoanServiceServer()
 }
 
@@ -176,6 +189,9 @@ func (UnimplementedLoanServiceServer) GetAllLoanApplications(context.Context, *G
 }
 func (UnimplementedLoanServiceServer) GetAllLoans(context.Context, *GetAllLoansRequest) (*GetAllLoansResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAllLoans not implemented")
+}
+func (UnimplementedLoanServiceServer) TriggerInstallments(context.Context, *TriggerInstallmentsRequest) (*TriggerInstallmentsResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method TriggerInstallments not implemented")
 }
 func (UnimplementedLoanServiceServer) mustEmbedUnimplementedLoanServiceServer() {}
 func (UnimplementedLoanServiceServer) testEmbeddedByValue()                     {}
@@ -342,6 +358,24 @@ func _LoanService_GetAllLoans_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LoanService_TriggerInstallments_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TriggerInstallmentsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LoanServiceServer).TriggerInstallments(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LoanService_TriggerInstallments_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LoanServiceServer).TriggerInstallments(ctx, req.(*TriggerInstallmentsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LoanService_ServiceDesc is the grpc.ServiceDesc for LoanService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +414,10 @@ var LoanService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllLoans",
 			Handler:    _LoanService_GetAllLoans_Handler,
+		},
+		{
+			MethodName: "TriggerInstallments",
+			Handler:    _LoanService_TriggerInstallments_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

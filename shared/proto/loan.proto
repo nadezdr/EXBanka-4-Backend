@@ -150,6 +150,15 @@ message GetAllLoansResponse {
 
 // --- Service ---
 
+// --- TriggerInstallments ---
+
+message TriggerInstallmentsRequest {
+  int64 force_loan_id = 1; // if > 0, process this loan regardless of next_installment_date
+}
+message TriggerInstallmentsResponse { int32 processed = 1; }
+
+// --- Service ---
+
 service LoanService {
   rpc GetClientLoans          (GetClientLoansRequest)          returns (GetClientLoansResponse);
   rpc GetLoanDetails          (GetLoanDetailsRequest)          returns (GetLoanDetailsResponse);
@@ -159,4 +168,5 @@ service LoanService {
   rpc RejectLoan              (RejectLoanRequest)              returns (RejectLoanResponse);
   rpc GetAllLoanApplications  (GetAllLoanApplicationsRequest)  returns (GetAllLoanApplicationsResponse);
   rpc GetAllLoans             (GetAllLoansRequest)             returns (GetAllLoansResponse);
+  rpc TriggerInstallments     (TriggerInstallmentsRequest)     returns (TriggerInstallmentsResponse);
 }

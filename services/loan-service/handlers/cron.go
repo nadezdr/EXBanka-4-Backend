@@ -30,30 +30,41 @@ func (s *LoanServer) runDailyCron() {
 		next := time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
 		time.Sleep(time.Until(next))
 		log.Println("loan-service: running daily installment deduction")
-		s.collectInstallments()
+		s.collectInstallments(0)
 	}
 }
 
-func (s *LoanServer) collectInstallments() {
+func (s *LoanServer) collectInstallments(forceLoanID int64) int {
 	ctx := context.Background()
 
-	// Find all loans due today (APPROVED) OR IN_DELAY with no retry in last 72h
-	rows, err := s.DB.QueryContext(ctx, `
-		SELECT id, loan_number, client_id, account_number, next_installment_amount, currency, remaining_debt
-		FROM loans
-		WHERE (
-		    (status = 'APPROVED' AND next_installment_date = CURRENT_DATE)
-		    OR
-		    (status = 'IN_DELAY' AND EXISTS (
-		        SELECT 1 FROM loan_installments
-		        WHERE loan_id = loans.id AND status IN ('UNPAID', 'LATE')
-		          AND (last_retry_at IS NULL OR last_retry_at < NOW() - INTERVAL '72 hours')
-		        LIMIT 1
-		    ))
-		)`)
+	var rows *sql.Rows
+	var err error
+
+	if forceLoanID > 0 {
+		// Force-process a specific loan regardless of next_installment_date (used by tests)
+		rows, err = s.DB.QueryContext(ctx, `
+			SELECT id, loan_number, client_id, account_number, next_installment_amount, currency, remaining_debt
+			FROM loans
+			WHERE id = $1 AND status IN ('APPROVED', 'IN_DELAY')`, forceLoanID)
+	} else {
+		// Normal daily run: find all loans due today
+		rows, err = s.DB.QueryContext(ctx, `
+			SELECT id, loan_number, client_id, account_number, next_installment_amount, currency, remaining_debt
+			FROM loans
+			WHERE (
+			    (status = 'APPROVED' AND next_installment_date = CURRENT_DATE)
+			    OR
+			    (status = 'IN_DELAY' AND EXISTS (
+			        SELECT 1 FROM loan_installments
+			        WHERE loan_id = loans.id AND status IN ('UNPAID', 'LATE')
+			          AND (last_retry_at IS NULL OR last_retry_at < NOW() - INTERVAL '72 hours')
+			        LIMIT 1
+			    ))
+			)`)
+	}
 	if err != nil {
 		log.Printf("loan-service: daily cron query error: %v", err)
-		return
+		return 0
 	}
 	defer rows.Close()
 
@@ -93,6 +104,7 @@ func (s *LoanServer) collectInstallments() {
 	for _, l := range loans {
 		s.processInstallment(ctx, l.id, l.loanNumber, l.clientID, l.accountNumber, l.amount, l.currency, l.remainingDebt)
 	}
+	return len(loans)
 }
 
 func (s *LoanServer) processInstallment(ctx context.Context, loanID int64, loanNumber int64, clientID int64, accountNumber string, amount float64, currency string, remainingDebt float64) {

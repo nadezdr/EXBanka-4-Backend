@@ -1282,6 +1282,94 @@ func (x *GetAllLoansResponse) GetLoans() []*LoanDetail {
 	return nil
 }
 
+type TriggerInstallmentsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ForceLoanId   int64                  `protobuf:"varint,1,opt,name=force_loan_id,json=forceLoanId,proto3" json:"force_loan_id,omitempty"` // if > 0, process this loan regardless of next_installment_date
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TriggerInstallmentsRequest) Reset() {
+	*x = TriggerInstallmentsRequest{}
+	mi := &file_loan_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerInstallmentsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerInstallmentsRequest) ProtoMessage() {}
+
+func (x *TriggerInstallmentsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_loan_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerInstallmentsRequest.ProtoReflect.Descriptor instead.
+func (*TriggerInstallmentsRequest) Descriptor() ([]byte, []int) {
+	return file_loan_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *TriggerInstallmentsRequest) GetForceLoanId() int64 {
+	if x != nil {
+		return x.ForceLoanId
+	}
+	return 0
+}
+
+type TriggerInstallmentsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Processed     int32                  `protobuf:"varint,1,opt,name=processed,proto3" json:"processed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TriggerInstallmentsResponse) Reset() {
+	*x = TriggerInstallmentsResponse{}
+	mi := &file_loan_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TriggerInstallmentsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TriggerInstallmentsResponse) ProtoMessage() {}
+
+func (x *TriggerInstallmentsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_loan_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TriggerInstallmentsResponse.ProtoReflect.Descriptor instead.
+func (*TriggerInstallmentsResponse) Descriptor() ([]byte, []int) {
+	return file_loan_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *TriggerInstallmentsResponse) GetProcessed() int32 {
+	if x != nil {
+		return x.Processed
+	}
+	return 0
+}
+
 var File_loan_proto protoreflect.FileDescriptor
 
 const file_loan_proto_rawDesc = "" +
@@ -1387,7 +1475,11 @@ const file_loan_proto_rawDesc = "" +
 	"\x0eaccount_number\x18\x02 \x01(\tR\raccountNumber\x12\x16\n" +
 	"\x06status\x18\x03 \x01(\tR\x06status\"=\n" +
 	"\x13GetAllLoansResponse\x12&\n" +
-	"\x05loans\x18\x01 \x03(\v2\x10.loan.LoanDetailR\x05loans2\x93\x05\n" +
+	"\x05loans\x18\x01 \x03(\v2\x10.loan.LoanDetailR\x05loans\"@\n" +
+	"\x1aTriggerInstallmentsRequest\x12\"\n" +
+	"\rforce_loan_id\x18\x01 \x01(\x03R\vforceLoanId\";\n" +
+	"\x1bTriggerInstallmentsResponse\x12\x1c\n" +
+	"\tprocessed\x18\x01 \x01(\x05R\tprocessed2\xef\x05\n" +
 	"\vLoanService\x12K\n" +
 	"\x0eGetClientLoans\x12\x1b.loan.GetClientLoansRequest\x1a\x1c.loan.GetClientLoansResponse\x12K\n" +
 	"\x0eGetLoanDetails\x12\x1b.loan.GetLoanDetailsRequest\x1a\x1c.loan.GetLoanDetailsResponse\x12Z\n" +
@@ -1397,7 +1489,8 @@ const file_loan_proto_rawDesc = "" +
 	"\n" +
 	"RejectLoan\x12\x17.loan.RejectLoanRequest\x1a\x18.loan.RejectLoanResponse\x12c\n" +
 	"\x16GetAllLoanApplications\x12#.loan.GetAllLoanApplicationsRequest\x1a$.loan.GetAllLoanApplicationsResponse\x12B\n" +
-	"\vGetAllLoans\x12\x18.loan.GetAllLoansRequest\x1a\x19.loan.GetAllLoansResponseB9Z7github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/loanb\x06proto3"
+	"\vGetAllLoans\x12\x18.loan.GetAllLoansRequest\x1a\x19.loan.GetAllLoansResponse\x12Z\n" +
+	"\x13TriggerInstallments\x12 .loan.TriggerInstallmentsRequest\x1a!.loan.TriggerInstallmentsResponseB9Z7github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/loanb\x06proto3"
 
 var (
 	file_loan_proto_rawDescOnce sync.Once
@@ -1411,7 +1504,7 @@ func file_loan_proto_rawDescGZIP() []byte {
 	return file_loan_proto_rawDescData
 }
 
-var file_loan_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_loan_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_loan_proto_goTypes = []any{
 	(*LoanSummary)(nil),                    // 0: loan.LoanSummary
 	(*LoanDetail)(nil),                     // 1: loan.LoanDetail
@@ -1432,6 +1525,8 @@ var file_loan_proto_goTypes = []any{
 	(*GetAllLoanApplicationsResponse)(nil), // 16: loan.GetAllLoanApplicationsResponse
 	(*GetAllLoansRequest)(nil),             // 17: loan.GetAllLoansRequest
 	(*GetAllLoansResponse)(nil),            // 18: loan.GetAllLoansResponse
+	(*TriggerInstallmentsRequest)(nil),     // 19: loan.TriggerInstallmentsRequest
+	(*TriggerInstallmentsResponse)(nil),    // 20: loan.TriggerInstallmentsResponse
 }
 var file_loan_proto_depIdxs = []int32{
 	0,  // 0: loan.GetClientLoansResponse.loans:type_name -> loan.LoanSummary
@@ -1448,16 +1543,18 @@ var file_loan_proto_depIdxs = []int32{
 	13, // 11: loan.LoanService.RejectLoan:input_type -> loan.RejectLoanRequest
 	15, // 12: loan.LoanService.GetAllLoanApplications:input_type -> loan.GetAllLoanApplicationsRequest
 	17, // 13: loan.LoanService.GetAllLoans:input_type -> loan.GetAllLoansRequest
-	4,  // 14: loan.LoanService.GetClientLoans:output_type -> loan.GetClientLoansResponse
-	6,  // 15: loan.LoanService.GetLoanDetails:output_type -> loan.GetLoanDetailsResponse
-	8,  // 16: loan.LoanService.GetLoanInstallments:output_type -> loan.GetLoanInstallmentsResponse
-	10, // 17: loan.LoanService.SubmitLoanApplication:output_type -> loan.SubmitLoanApplicationResponse
-	12, // 18: loan.LoanService.ApproveLoan:output_type -> loan.ApproveLoanResponse
-	14, // 19: loan.LoanService.RejectLoan:output_type -> loan.RejectLoanResponse
-	16, // 20: loan.LoanService.GetAllLoanApplications:output_type -> loan.GetAllLoanApplicationsResponse
-	18, // 21: loan.LoanService.GetAllLoans:output_type -> loan.GetAllLoansResponse
-	14, // [14:22] is the sub-list for method output_type
-	6,  // [6:14] is the sub-list for method input_type
+	19, // 14: loan.LoanService.TriggerInstallments:input_type -> loan.TriggerInstallmentsRequest
+	4,  // 15: loan.LoanService.GetClientLoans:output_type -> loan.GetClientLoansResponse
+	6,  // 16: loan.LoanService.GetLoanDetails:output_type -> loan.GetLoanDetailsResponse
+	8,  // 17: loan.LoanService.GetLoanInstallments:output_type -> loan.GetLoanInstallmentsResponse
+	10, // 18: loan.LoanService.SubmitLoanApplication:output_type -> loan.SubmitLoanApplicationResponse
+	12, // 19: loan.LoanService.ApproveLoan:output_type -> loan.ApproveLoanResponse
+	14, // 20: loan.LoanService.RejectLoan:output_type -> loan.RejectLoanResponse
+	16, // 21: loan.LoanService.GetAllLoanApplications:output_type -> loan.GetAllLoanApplicationsResponse
+	18, // 22: loan.LoanService.GetAllLoans:output_type -> loan.GetAllLoansResponse
+	20, // 23: loan.LoanService.TriggerInstallments:output_type -> loan.TriggerInstallmentsResponse
+	15, // [15:24] is the sub-list for method output_type
+	6,  // [6:15] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -1474,7 +1571,7 @@ func file_loan_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_loan_proto_rawDesc), len(file_loan_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

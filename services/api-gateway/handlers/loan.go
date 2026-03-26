@@ -391,3 +391,30 @@ func loanDetailsToJSON(loans []*pb.LoanDetail) []map[string]interface{} {
 	}
 	return result
 }
+
+// TriggerInstallments godoc
+// @Summary      Manually trigger daily installment collection (admin/test only)
+// @Tags         loans
+// @Produce      json
+// @Success      200  {object}  map[string]int
+// @Router       /admin/loans/trigger-installments [post]
+func TriggerInstallments(client pb.LoanServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body struct {
+			ForceLoanId int64 `json:"forceLoanId"`
+		}
+		_ = c.ShouldBindJSON(&body) // optional body — ignore parse errors
+
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 30*time.Second)
+		defer cancel()
+
+		resp, err := client.TriggerInstallments(ctx, &pb.TriggerInstallmentsRequest{
+			ForceLoanId: body.ForceLoanId,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": status.Convert(err).Message()})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"processed": resp.Processed})
+	}
+}

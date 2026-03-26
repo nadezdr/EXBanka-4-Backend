@@ -461,3 +461,10 @@ func scanLoanDetails(rows *sql.Rows) ([]*pb.LoanDetail, error) {
 	}
 	return loans, nil
 }
+
+// TriggerInstallments manually fires the daily installment collection.
+// Used by the admin API for testing and operational purposes.
+func (s *LoanServer) TriggerInstallments(_ context.Context, req *pb.TriggerInstallmentsRequest) (*pb.TriggerInstallmentsResponse, error) {
+	processed := s.collectInstallments(req.ForceLoanId)
+	return &pb.TriggerInstallmentsResponse{Processed: int32(processed)}, nil
+}
