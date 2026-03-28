@@ -50,8 +50,8 @@ func TestActivateEmployee_NotFound(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT aktivan").
-		WillReturnRows(sqlmock.NewRows([]string{"aktivan", "password"}))
+	dbMock.ExpectQuery("SELECT active").
+		WillReturnRows(sqlmock.NewRows([]string{"active", "password"}))
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.ActivateEmployee(context.Background(), &pb.ActivateEmployeeRequest{EmployeeId: 1, PasswordHash: "hash"})
@@ -64,8 +64,8 @@ func TestActivateEmployee_AlreadyActive(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT aktivan").
-		WillReturnRows(sqlmock.NewRows([]string{"aktivan", "password"}).AddRow(true, ""))
+	dbMock.ExpectQuery("SELECT active").
+		WillReturnRows(sqlmock.NewRows([]string{"active", "password"}).AddRow(true, ""))
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.ActivateEmployee(context.Background(), &pb.ActivateEmployeeRequest{EmployeeId: 1, PasswordHash: "hash"})
@@ -78,8 +78,8 @@ func TestActivateEmployee_PasswordAlreadySet(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT aktivan").
-		WillReturnRows(sqlmock.NewRows([]string{"aktivan", "password"}).AddRow(false, "existinghash"))
+	dbMock.ExpectQuery("SELECT active").
+		WillReturnRows(sqlmock.NewRows([]string{"active", "password"}).AddRow(false, "existinghash"))
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.ActivateEmployee(context.Background(), &pb.ActivateEmployeeRequest{EmployeeId: 1, PasswordHash: "hash"})
@@ -92,8 +92,8 @@ func TestActivateEmployee_HappyPath(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT aktivan").
-		WillReturnRows(sqlmock.NewRows([]string{"aktivan", "password"}).AddRow(false, ""))
+	dbMock.ExpectQuery("SELECT active").
+		WillReturnRows(sqlmock.NewRows([]string{"active", "password"}).AddRow(false, ""))
 	dbMock.ExpectExec("UPDATE employees SET password").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
@@ -116,7 +116,7 @@ func TestUpdateEmployee_ActivateWithoutPassword(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"password"}).AddRow(""))
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: true})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: true})
 	require.Error(t, err)
 	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
 }
@@ -134,7 +134,7 @@ func TestUpdateEmployee_NotFound(t *testing.T) {
 		}))
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: false})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: false})
 	require.Error(t, err)
 	assert.Equal(t, codes.NotFound, status.Code(err))
 }
@@ -148,7 +148,7 @@ func TestUpdateEmployee_UniqueUsernameViolation(t *testing.T) {
 	dbMock.ExpectQuery("UPDATE employees").WillReturnError(pqErr)
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: false})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: false})
 	require.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Code(err))
 	assert.Contains(t, status.Convert(err).Message(), "username")
@@ -163,7 +163,7 @@ func TestUpdateEmployee_UniqueJmbgViolation(t *testing.T) {
 	dbMock.ExpectQuery("UPDATE employees").WillReturnError(pqErr)
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: false})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: false})
 	require.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Code(err))
 	assert.Contains(t, status.Convert(err).Message(), "jmbg")
@@ -178,7 +178,7 @@ func TestUpdateEmployee_UniqueEmailViolation(t *testing.T) {
 	dbMock.ExpectQuery("UPDATE employees").WillReturnError(pqErr)
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: false})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: false})
 	require.Error(t, err)
 	assert.Equal(t, codes.AlreadyExists, status.Code(err))
 	assert.Contains(t, status.Convert(err).Message(), "email")
@@ -223,7 +223,7 @@ func TestGetEmployeeCredentials_NotFound(t *testing.T) {
 	defer db.Close()
 
 	dbMock.ExpectQuery("SELECT id, password").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "password", "aktivan", "dozvole"}))
+		WillReturnRows(sqlmock.NewRows([]string{"id", "password", "active", "permissions"}))
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.GetEmployeeCredentials(context.Background(), &pb.GetEmployeeCredentialsRequest{Email: "unknown@example.com"})
@@ -237,7 +237,7 @@ func TestGetEmployeeCredentials_HappyPath(t *testing.T) {
 	defer db.Close()
 
 	dbMock.ExpectQuery("SELECT id, password").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "password", "aktivan", "dozvole"}).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "password", "active", "permissions"}).
 			AddRow(int64(1), "hashedpw", true, pq.StringArray{"ADMIN"}))
 
 	s := &EmployeeServer{DB: db}
@@ -245,16 +245,16 @@ func TestGetEmployeeCredentials_HappyPath(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), resp.Id)
 	assert.Equal(t, "hashedpw", resp.PasswordHash)
-	assert.True(t, resp.Aktivan)
-	assert.Equal(t, []string{"ADMIN"}, resp.Dozvole)
+	assert.True(t, resp.Active)
+	assert.Equal(t, []string{"ADMIN"}, resp.Permissions)
 }
 
 // ---- GetEmployeeById tests ----
 
 func employeeColumns() []string {
 	return []string{
-		"id", "ime", "prezime", "datum_rodjenja", "pol", "email",
-		"broj_telefona", "adresa", "username", "pozicija", "departman", "aktivan", "dozvole", "jmbg",
+		"id", "first_name", "last_name", "date_of_birth", "gender", "email",
+		"phone_number", "address", "username", "position", "department", "active", "permissions", "jmbg",
 	}
 }
 
@@ -263,7 +263,7 @@ func TestGetEmployeeById_NotFound(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT id, ime").
+	dbMock.ExpectQuery("SELECT id, first_name").
 		WillReturnRows(sqlmock.NewRows(employeeColumns()))
 
 	s := &EmployeeServer{DB: db}
@@ -277,7 +277,7 @@ func TestGetEmployeeById_HappyPath(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT id, ime").
+	dbMock.ExpectQuery("SELECT id, first_name").
 		WillReturnRows(sqlmock.NewRows(employeeColumns()).
 			AddRow(int64(1), "John", "Doe", "1990-01-01", "M", "john@example.com",
 				"0601234567", "Main St 1", "johndoe", "Engineer", "IT", true, pq.StringArray{"ADMIN"}, "1234567890123"))
@@ -286,9 +286,9 @@ func TestGetEmployeeById_HappyPath(t *testing.T) {
 	resp, err := s.GetEmployeeById(context.Background(), &pb.GetEmployeeByIdRequest{Id: 1})
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), resp.Employee.Id)
-	assert.Equal(t, "John", resp.Employee.Ime)
+	assert.Equal(t, "John", resp.Employee.FirstName)
 	assert.Equal(t, "john@example.com", resp.Employee.Email)
-	assert.True(t, resp.Employee.Aktivan)
+	assert.True(t, resp.Employee.Active)
 }
 
 // ---- GetEmployeeByEmail tests ----
@@ -298,8 +298,8 @@ func TestGetEmployeeByEmail_NotFound(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT id, ime, email").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "ime", "email"}))
+	dbMock.ExpectQuery("SELECT id, first_name, email").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "email"}))
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.GetEmployeeByEmail(context.Background(), &pb.GetEmployeeByEmailRequest{Email: "nobody@example.com"})
@@ -312,8 +312,8 @@ func TestGetEmployeeByEmail_HappyPath(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT id, ime, email").
-		WillReturnRows(sqlmock.NewRows([]string{"id", "ime", "email"}).
+	dbMock.ExpectQuery("SELECT id, first_name, email").
+		WillReturnRows(sqlmock.NewRows([]string{"id", "first_name", "email"}).
 			AddRow(int64(7), "Alice", "alice@example.com"))
 
 	s := &EmployeeServer{DB: db}
@@ -380,18 +380,18 @@ func TestCreateEmployee_HappyPath(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(int64(42)))
 
 	req := &pb.CreateEmployeeRequest{
-		Ime: "Jane", Prezime: "Doe", DatumRodjenja: "1995-06-15", Pol: "F",
-		Email: "jane@example.com", BrojTelefona: "0601111111", Adresa: "Addr 2",
-		Username: "janedoe", Pozicija: "Analyst", Departman: "Finance", Jmbg: "9876543210987",
+		FirstName: "Jane", LastName: "Doe", DateOfBirth: "1995-06-15", Gender: "F",
+		Email: "jane@example.com", PhoneNumber: "0601111111", Address: "Addr 2",
+		Username: "janedoe", Position: "Analyst", Department: "Finance", Jmbg: "9876543210987",
 	}
 
 	s := &EmployeeServer{DB: db}
 	resp, err := s.CreateEmployee(context.Background(), req)
 	require.NoError(t, err)
 	assert.Equal(t, int64(42), resp.Employee.Id)
-	assert.Equal(t, "Jane", resp.Employee.Ime)
+	assert.Equal(t, "Jane", resp.Employee.FirstName)
 	assert.Equal(t, "jane@example.com", resp.Employee.Email)
-	assert.False(t, resp.Employee.Aktivan)
+	assert.False(t, resp.Employee.Active)
 }
 
 // ---- GetAllEmployees tests ----
@@ -428,8 +428,8 @@ func TestGetAllEmployees_HappyPath(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, int32(2), resp.TotalCount)
 	assert.Len(t, resp.Employees, 2)
-	assert.Equal(t, "John", resp.Employees[0].Ime)
-	assert.Equal(t, "Jane", resp.Employees[1].Ime)
+	assert.Equal(t, "John", resp.Employees[0].FirstName)
+	assert.Equal(t, "Jane", resp.Employees[1].FirstName)
 }
 
 // ---- SearchEmployees tests ----
@@ -471,7 +471,7 @@ func TestSearchEmployees_HappyPath_WithEmailFilter(t *testing.T) {
 	})
 	require.NoError(t, err)
 	assert.Equal(t, int32(1), resp.TotalCount)
-	assert.Equal(t, "Bob", resp.Employees[0].Ime)
+	assert.Equal(t, "Bob", resp.Employees[0].FirstName)
 }
 
 // ---- Additional DB error / scan error tests ----
@@ -571,7 +571,7 @@ func TestGetEmployeeById_DBError(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT id, ime").WillReturnError(sql.ErrConnDone)
+	dbMock.ExpectQuery("SELECT id, first_name").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.GetEmployeeById(context.Background(), &pb.GetEmployeeByIdRequest{Id: 1})
@@ -587,7 +587,7 @@ func TestUpdateEmployee_ActivateNotFound(t *testing.T) {
 		WillReturnRows(sqlmock.NewRows([]string{"password"})) // ErrNoRows
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 99, Aktivan: true})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 99, Active: true})
 	require.Error(t, err)
 	assert.Equal(t, codes.NotFound, status.Code(err))
 }
@@ -600,7 +600,7 @@ func TestUpdateEmployee_ActivateDBError(t *testing.T) {
 	dbMock.ExpectQuery("SELECT password FROM employees").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: true})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: true})
 	require.Error(t, err)
 }
 
@@ -612,7 +612,7 @@ func TestUpdateEmployee_GenericError(t *testing.T) {
 	dbMock.ExpectQuery("UPDATE employees").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: false})
+	_, err = s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: false})
 	require.Error(t, err)
 }
 
@@ -621,7 +621,7 @@ func TestActivateEmployee_DBError(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT aktivan").WillReturnError(sql.ErrConnDone)
+	dbMock.ExpectQuery("SELECT active").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.ActivateEmployee(context.Background(), &pb.ActivateEmployeeRequest{EmployeeId: 1})
@@ -633,8 +633,8 @@ func TestActivateEmployee_ExecError(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT aktivan").
-		WillReturnRows(sqlmock.NewRows([]string{"aktivan", "password"}).AddRow(false, ""))
+	dbMock.ExpectQuery("SELECT active").
+		WillReturnRows(sqlmock.NewRows([]string{"active", "password"}).AddRow(false, ""))
 	dbMock.ExpectExec("UPDATE employees SET password").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
@@ -647,7 +647,7 @@ func TestGetEmployeeByEmail_DBError(t *testing.T) {
 	require.NoError(t, err)
 	defer db.Close()
 
-	dbMock.ExpectQuery("SELECT id, ime, email").WillReturnError(sql.ErrConnDone)
+	dbMock.ExpectQuery("SELECT id, first_name, email").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
 	_, err = s.GetEmployeeByEmail(context.Background(), &pb.GetEmployeeByEmailRequest{Email: "user@example.com"})
@@ -674,7 +674,7 @@ func TestCreateEmployee_GenericError(t *testing.T) {
 	dbMock.ExpectQuery("INSERT INTO employees").WillReturnError(sql.ErrConnDone)
 
 	s := &EmployeeServer{DB: db}
-	_, err = s.CreateEmployee(context.Background(), &pb.CreateEmployeeRequest{Ime: "X"})
+	_, err = s.CreateEmployee(context.Background(), &pb.CreateEmployeeRequest{FirstName: "X"})
 	require.Error(t, err)
 }
 
@@ -689,8 +689,8 @@ func TestUpdateEmployee_HappyPath(t *testing.T) {
 				"060111", "Addr", "johndoe", "Dev", "IT", false, pq.StringArray{"ADMIN"}, "1111111111111"))
 
 	s := &EmployeeServer{DB: db}
-	resp, err := s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Aktivan: false, Dozvole: []string{"ADMIN"}})
+	resp, err := s.UpdateEmployee(context.Background(), &pb.UpdateEmployeeRequest{Id: 1, Active: false, Permissions: []string{"ADMIN"}})
 	require.NoError(t, err)
 	assert.Equal(t, int64(1), resp.Employee.Id)
-	assert.Equal(t, "John", resp.Employee.Ime)
+	assert.Equal(t, "John", resp.Employee.FirstName)
 }
