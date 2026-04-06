@@ -199,3 +199,233 @@ func DeleteStockExchange(client pb.SecuritiesServiceClient) gin.HandlerFunc {
 		c.Status(http.StatusNoContent)
 	}
 }
+
+// ── Working Hours ─────────────────────────────────────────────────────────────
+
+type workingHoursJSON struct {
+	ID        int64  `json:"id"`
+	Polity    string `json:"polity"`
+	Segment   string `json:"segment"`
+	OpenTime  string `json:"openTime"`
+	CloseTime string `json:"closeTime"`
+}
+
+func toWorkingHoursJSON(h *pb.ExchangeWorkingHours) workingHoursJSON {
+	return workingHoursJSON{
+		ID: h.Id, Polity: h.Polity, Segment: h.Segment,
+		OpenTime: h.OpenTime, CloseTime: h.CloseTime,
+	}
+}
+
+// GetWorkingHours godoc
+// @Summary      Get working hours for an exchange
+// @Tags         securities
+// @Param        mic  path  string  true  "MIC code"
+// @Success      200  {array}  workingHoursJSON
+// @Router       /stock-exchanges/{mic}/hours [get]
+func GetWorkingHours(client pb.SecuritiesServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mic := c.Param("mic")
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		resp, err := client.GetWorkingHours(ctx, &pb.GetWorkingHoursRequest{MicCode: mic})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch working hours"})
+			return
+		}
+		result := make([]workingHoursJSON, 0, len(resp.Hours))
+		for _, h := range resp.Hours {
+			result = append(result, toWorkingHoursJSON(h))
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+// SetWorkingHours godoc
+// @Summary      Set (upsert) working hours for a polity
+// @Tags         securities
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}  workingHoursJSON
+// @Router       /stock-exchanges/hours [post]
+func SetWorkingHours(client pb.SecuritiesServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body struct {
+			Polity    string `json:"polity"     binding:"required"`
+			Segment   string `json:"segment"    binding:"required"`
+			OpenTime  string `json:"openTime"   binding:"required"`
+			CloseTime string `json:"closeTime"  binding:"required"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		resp, err := client.SetWorkingHours(ctx, &pb.SetWorkingHoursRequest{
+			Polity:    body.Polity,
+			Segment:   body.Segment,
+			OpenTime:  body.OpenTime,
+			CloseTime: body.CloseTime,
+		})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to set working hours"})
+			return
+		}
+		c.JSON(http.StatusOK, toWorkingHoursJSON(resp.Hours))
+	}
+}
+
+// ── Holidays ──────────────────────────────────────────────────────────────────
+
+type holidayJSON struct {
+	ID          int64  `json:"id"`
+	Polity      string `json:"polity"`
+	HolidayDate string `json:"holidayDate"`
+	Description string `json:"description"`
+}
+
+func toHolidayJSON(h *pb.ExchangeHoliday) holidayJSON {
+	return holidayJSON{
+		ID: h.Id, Polity: h.Polity, HolidayDate: h.HolidayDate, Description: h.Description,
+	}
+}
+
+// GetHolidays godoc
+// @Summary      Get holidays for an exchange's polity
+// @Tags         securities
+// @Param        mic  path  string  true  "MIC code"
+// @Success      200  {array}  holidayJSON
+// @Router       /stock-exchanges/{mic}/holidays [get]
+func GetHolidays(client pb.SecuritiesServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mic := c.Param("mic")
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		// Resolve polity via GetStockExchangeByMIC first, then GetHolidays by polity
+		exchResp, err := client.GetStockExchangeByMIC(ctx, &pb.GetStockExchangeByMICRequest{MicCode: mic})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch exchange"})
+			return
+		}
+
+		resp, err := client.GetHolidays(ctx, &pb.GetHolidaysRequest{Polity: exchResp.Exchange.Polity})
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to fetch holidays"})
+			return
+		}
+		result := make([]holidayJSON, 0, len(resp.Holidays))
+		for _, h := range resp.Holidays {
+			result = append(result, toHolidayJSON(h))
+		}
+		c.JSON(http.StatusOK, result)
+	}
+}
+
+// AddHoliday godoc
+// @Summary      Add a holiday for a polity
+// @Tags         securities
+// @Accept       json
+// @Produce      json
+// @Success      201  {object}  holidayJSON
+// @Router       /stock-exchanges/holidays [post]
+func AddHoliday(client pb.SecuritiesServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var body struct {
+			Polity      string `json:"polity"       binding:"required"`
+			HolidayDate string `json:"holidayDate"  binding:"required"`
+			Description string `json:"description"`
+		}
+		if err := c.ShouldBindJSON(&body); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		resp, err := client.AddHoliday(ctx, &pb.AddHolidayRequest{
+			Polity:      body.Polity,
+			HolidayDate: body.HolidayDate,
+			Description: body.Description,
+		})
+		if err != nil {
+			if status.Code(err) == codes.AlreadyExists {
+				c.JSON(http.StatusConflict, gin.H{"error": status.Convert(err).Message()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to add holiday"})
+			return
+		}
+		c.JSON(http.StatusCreated, toHolidayJSON(resp.Holiday))
+	}
+}
+
+// DeleteHoliday godoc
+// @Summary      Delete a holiday for a polity
+// @Tags         securities
+// @Param        polity  path  string  true  "Polity (country)"
+// @Param        date    path  string  true  "Holiday date (YYYY-MM-DD)"
+// @Success      204
+// @Router       /stock-exchanges/holidays/{polity}/{date} [delete]
+func DeleteHoliday(client pb.SecuritiesServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		polity := c.Param("polity")
+		date := c.Param("date")
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		_, err := client.DeleteHoliday(ctx, &pb.DeleteHolidayRequest{Polity: polity, HolidayDate: date})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to delete holiday"})
+			return
+		}
+		c.Status(http.StatusNoContent)
+	}
+}
+
+// ── Exchange Status ───────────────────────────────────────────────────────────
+
+// IsExchangeOpen godoc
+// @Summary      Check if an exchange is currently open
+// @Tags         securities
+// @Param        mic  path  string  true  "MIC code"
+// @Success      200  {object}  map[string]interface{}
+// @Router       /stock-exchanges/{mic}/is-open [get]
+func IsExchangeOpen(client pb.SecuritiesServiceClient) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		mic := c.Param("mic")
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 10*time.Second)
+		defer cancel()
+
+		resp, err := client.IsExchangeOpen(ctx, &pb.IsExchangeOpenRequest{MicCode: mic})
+		if err != nil {
+			if status.Code(err) == codes.NotFound {
+				c.JSON(http.StatusNotFound, gin.H{"error": status.Convert(err).Message()})
+				return
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to check exchange status"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"micCode":          resp.MicCode,
+			"isOpen":           resp.IsOpen,
+			"segment":          resp.Segment,
+			"currentTimeLocal": resp.CurrentTimeLocal,
+		})
+	}
+}

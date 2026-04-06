@@ -193,7 +193,6 @@ func (x *StockExchange) GetTimezone() string {
 	return ""
 }
 
-// GetStockExchanges — list all
 type GetStockExchangesRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	unknownFields protoimpl.UnknownFields
@@ -274,7 +273,6 @@ func (x *GetStockExchangesResponse) GetExchanges() []*StockExchange {
 	return nil
 }
 
-// GetStockExchangeByMIC — get single by MIC code
 type GetStockExchangeByMICRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
@@ -363,7 +361,6 @@ func (x *GetStockExchangeByMICResponse) GetExchange() *StockExchange {
 	return nil
 }
 
-// CreateStockExchange
 type CreateStockExchangeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
@@ -492,7 +489,6 @@ func (x *CreateStockExchangeResponse) GetExchange() *StockExchange {
 	return nil
 }
 
-// UpdateStockExchange — identified by mic_code
 type UpdateStockExchangeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
@@ -621,7 +617,6 @@ func (x *UpdateStockExchangeResponse) GetExchange() *StockExchange {
 	return nil
 }
 
-// DeleteStockExchange
 type DeleteStockExchangeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
@@ -702,6 +697,742 @@ func (*DeleteStockExchangeResponse) Descriptor() ([]byte, []int) {
 	return file_securities_proto_rawDescGZIP(), []int{12}
 }
 
+type ExchangeWorkingHours struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Polity        string                 `protobuf:"bytes,2,opt,name=polity,proto3" json:"polity,omitempty"`
+	Segment       string                 `protobuf:"bytes,3,opt,name=segment,proto3" json:"segment,omitempty"`
+	OpenTime      string                 `protobuf:"bytes,4,opt,name=open_time,json=openTime,proto3" json:"open_time,omitempty"`
+	CloseTime     string                 `protobuf:"bytes,5,opt,name=close_time,json=closeTime,proto3" json:"close_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExchangeWorkingHours) Reset() {
+	*x = ExchangeWorkingHours{}
+	mi := &file_securities_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExchangeWorkingHours) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExchangeWorkingHours) ProtoMessage() {}
+
+func (x *ExchangeWorkingHours) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExchangeWorkingHours.ProtoReflect.Descriptor instead.
+func (*ExchangeWorkingHours) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ExchangeWorkingHours) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ExchangeWorkingHours) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *ExchangeWorkingHours) GetSegment() string {
+	if x != nil {
+		return x.Segment
+	}
+	return ""
+}
+
+func (x *ExchangeWorkingHours) GetOpenTime() string {
+	if x != nil {
+		return x.OpenTime
+	}
+	return ""
+}
+
+func (x *ExchangeWorkingHours) GetCloseTime() string {
+	if x != nil {
+		return x.CloseTime
+	}
+	return ""
+}
+
+type GetWorkingHoursRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWorkingHoursRequest) Reset() {
+	*x = GetWorkingHoursRequest{}
+	mi := &file_securities_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWorkingHoursRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorkingHoursRequest) ProtoMessage() {}
+
+func (x *GetWorkingHoursRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorkingHoursRequest.ProtoReflect.Descriptor instead.
+func (*GetWorkingHoursRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *GetWorkingHoursRequest) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+type GetWorkingHoursResponse struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Hours         []*ExchangeWorkingHours `protobuf:"bytes,1,rep,name=hours,proto3" json:"hours,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetWorkingHoursResponse) Reset() {
+	*x = GetWorkingHoursResponse{}
+	mi := &file_securities_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetWorkingHoursResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetWorkingHoursResponse) ProtoMessage() {}
+
+func (x *GetWorkingHoursResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetWorkingHoursResponse.ProtoReflect.Descriptor instead.
+func (*GetWorkingHoursResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *GetWorkingHoursResponse) GetHours() []*ExchangeWorkingHours {
+	if x != nil {
+		return x.Hours
+	}
+	return nil
+}
+
+type SetWorkingHoursRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Polity        string                 `protobuf:"bytes,1,opt,name=polity,proto3" json:"polity,omitempty"`
+	Segment       string                 `protobuf:"bytes,2,opt,name=segment,proto3" json:"segment,omitempty"`
+	OpenTime      string                 `protobuf:"bytes,3,opt,name=open_time,json=openTime,proto3" json:"open_time,omitempty"`
+	CloseTime     string                 `protobuf:"bytes,4,opt,name=close_time,json=closeTime,proto3" json:"close_time,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetWorkingHoursRequest) Reset() {
+	*x = SetWorkingHoursRequest{}
+	mi := &file_securities_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetWorkingHoursRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetWorkingHoursRequest) ProtoMessage() {}
+
+func (x *SetWorkingHoursRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetWorkingHoursRequest.ProtoReflect.Descriptor instead.
+func (*SetWorkingHoursRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *SetWorkingHoursRequest) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *SetWorkingHoursRequest) GetSegment() string {
+	if x != nil {
+		return x.Segment
+	}
+	return ""
+}
+
+func (x *SetWorkingHoursRequest) GetOpenTime() string {
+	if x != nil {
+		return x.OpenTime
+	}
+	return ""
+}
+
+func (x *SetWorkingHoursRequest) GetCloseTime() string {
+	if x != nil {
+		return x.CloseTime
+	}
+	return ""
+}
+
+type SetWorkingHoursResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Hours         *ExchangeWorkingHours  `protobuf:"bytes,1,opt,name=hours,proto3" json:"hours,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetWorkingHoursResponse) Reset() {
+	*x = SetWorkingHoursResponse{}
+	mi := &file_securities_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetWorkingHoursResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetWorkingHoursResponse) ProtoMessage() {}
+
+func (x *SetWorkingHoursResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetWorkingHoursResponse.ProtoReflect.Descriptor instead.
+func (*SetWorkingHoursResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *SetWorkingHoursResponse) GetHours() *ExchangeWorkingHours {
+	if x != nil {
+		return x.Hours
+	}
+	return nil
+}
+
+type ExchangeHoliday struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Polity        string                 `protobuf:"bytes,2,opt,name=polity,proto3" json:"polity,omitempty"`
+	HolidayDate   string                 `protobuf:"bytes,3,opt,name=holiday_date,json=holidayDate,proto3" json:"holiday_date,omitempty"` // "YYYY-MM-DD"
+	Description   string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ExchangeHoliday) Reset() {
+	*x = ExchangeHoliday{}
+	mi := &file_securities_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ExchangeHoliday) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ExchangeHoliday) ProtoMessage() {}
+
+func (x *ExchangeHoliday) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ExchangeHoliday.ProtoReflect.Descriptor instead.
+func (*ExchangeHoliday) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *ExchangeHoliday) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *ExchangeHoliday) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *ExchangeHoliday) GetHolidayDate() string {
+	if x != nil {
+		return x.HolidayDate
+	}
+	return ""
+}
+
+func (x *ExchangeHoliday) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type GetHolidaysRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Polity        string                 `protobuf:"bytes,1,opt,name=polity,proto3" json:"polity,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHolidaysRequest) Reset() {
+	*x = GetHolidaysRequest{}
+	mi := &file_securities_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHolidaysRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHolidaysRequest) ProtoMessage() {}
+
+func (x *GetHolidaysRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHolidaysRequest.ProtoReflect.Descriptor instead.
+func (*GetHolidaysRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *GetHolidaysRequest) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+type GetHolidaysResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Holidays      []*ExchangeHoliday     `protobuf:"bytes,1,rep,name=holidays,proto3" json:"holidays,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHolidaysResponse) Reset() {
+	*x = GetHolidaysResponse{}
+	mi := &file_securities_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHolidaysResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHolidaysResponse) ProtoMessage() {}
+
+func (x *GetHolidaysResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHolidaysResponse.ProtoReflect.Descriptor instead.
+func (*GetHolidaysResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetHolidaysResponse) GetHolidays() []*ExchangeHoliday {
+	if x != nil {
+		return x.Holidays
+	}
+	return nil
+}
+
+type AddHolidayRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Polity        string                 `protobuf:"bytes,1,opt,name=polity,proto3" json:"polity,omitempty"`
+	HolidayDate   string                 `protobuf:"bytes,2,opt,name=holiday_date,json=holidayDate,proto3" json:"holiday_date,omitempty"` // "YYYY-MM-DD"
+	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddHolidayRequest) Reset() {
+	*x = AddHolidayRequest{}
+	mi := &file_securities_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddHolidayRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddHolidayRequest) ProtoMessage() {}
+
+func (x *AddHolidayRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddHolidayRequest.ProtoReflect.Descriptor instead.
+func (*AddHolidayRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *AddHolidayRequest) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *AddHolidayRequest) GetHolidayDate() string {
+	if x != nil {
+		return x.HolidayDate
+	}
+	return ""
+}
+
+func (x *AddHolidayRequest) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type AddHolidayResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Holiday       *ExchangeHoliday       `protobuf:"bytes,1,opt,name=holiday,proto3" json:"holiday,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AddHolidayResponse) Reset() {
+	*x = AddHolidayResponse{}
+	mi := &file_securities_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AddHolidayResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AddHolidayResponse) ProtoMessage() {}
+
+func (x *AddHolidayResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AddHolidayResponse.ProtoReflect.Descriptor instead.
+func (*AddHolidayResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *AddHolidayResponse) GetHoliday() *ExchangeHoliday {
+	if x != nil {
+		return x.Holiday
+	}
+	return nil
+}
+
+type DeleteHolidayRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Polity        string                 `protobuf:"bytes,1,opt,name=polity,proto3" json:"polity,omitempty"`
+	HolidayDate   string                 `protobuf:"bytes,2,opt,name=holiday_date,json=holidayDate,proto3" json:"holiday_date,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteHolidayRequest) Reset() {
+	*x = DeleteHolidayRequest{}
+	mi := &file_securities_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteHolidayRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteHolidayRequest) ProtoMessage() {}
+
+func (x *DeleteHolidayRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteHolidayRequest.ProtoReflect.Descriptor instead.
+func (*DeleteHolidayRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *DeleteHolidayRequest) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *DeleteHolidayRequest) GetHolidayDate() string {
+	if x != nil {
+		return x.HolidayDate
+	}
+	return ""
+}
+
+type DeleteHolidayResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteHolidayResponse) Reset() {
+	*x = DeleteHolidayResponse{}
+	mi := &file_securities_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteHolidayResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteHolidayResponse) ProtoMessage() {}
+
+func (x *DeleteHolidayResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteHolidayResponse.ProtoReflect.Descriptor instead.
+func (*DeleteHolidayResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{24}
+}
+
+type IsExchangeOpenRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IsExchangeOpenRequest) Reset() {
+	*x = IsExchangeOpenRequest{}
+	mi := &file_securities_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsExchangeOpenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsExchangeOpenRequest) ProtoMessage() {}
+
+func (x *IsExchangeOpenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsExchangeOpenRequest.ProtoReflect.Descriptor instead.
+func (*IsExchangeOpenRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *IsExchangeOpenRequest) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+type IsExchangeOpenResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	MicCode          string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	IsOpen           bool                   `protobuf:"varint,2,opt,name=is_open,json=isOpen,proto3" json:"is_open,omitempty"`
+	Segment          string                 `protobuf:"bytes,3,opt,name=segment,proto3" json:"segment,omitempty"`                                             // "pre_market", "regular", "post_market", or "closed"
+	CurrentTimeLocal string                 `protobuf:"bytes,4,opt,name=current_time_local,json=currentTimeLocal,proto3" json:"current_time_local,omitempty"` // "HH:MM" in exchange's local timezone
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *IsExchangeOpenResponse) Reset() {
+	*x = IsExchangeOpenResponse{}
+	mi := &file_securities_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IsExchangeOpenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IsExchangeOpenResponse) ProtoMessage() {}
+
+func (x *IsExchangeOpenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IsExchangeOpenResponse.ProtoReflect.Descriptor instead.
+func (*IsExchangeOpenResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *IsExchangeOpenResponse) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+func (x *IsExchangeOpenResponse) GetIsOpen() bool {
+	if x != nil {
+		return x.IsOpen
+	}
+	return false
+}
+
+func (x *IsExchangeOpenResponse) GetSegment() string {
+	if x != nil {
+		return x.Segment
+	}
+	return ""
+}
+
+func (x *IsExchangeOpenResponse) GetCurrentTimeLocal() string {
+	if x != nil {
+		return x.CurrentTimeLocal
+	}
+	return ""
+}
+
 var File_securities_proto protoreflect.FileDescriptor
 
 const file_securities_proto_rawDesc = "" +
@@ -746,14 +1477,66 @@ const file_securities_proto_rawDesc = "" +
 	"\bexchange\x18\x01 \x01(\v2\x19.securities.StockExchangeR\bexchange\"7\n" +
 	"\x1aDeleteStockExchangeRequest\x12\x19\n" +
 	"\bmic_code\x18\x01 \x01(\tR\amicCode\"\x1d\n" +
-	"\x1bDeleteStockExchangeResponse2\xd6\x04\n" +
+	"\x1bDeleteStockExchangeResponse\"\x94\x01\n" +
+	"\x14ExchangeWorkingHours\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
+	"\x06polity\x18\x02 \x01(\tR\x06polity\x12\x18\n" +
+	"\asegment\x18\x03 \x01(\tR\asegment\x12\x1b\n" +
+	"\topen_time\x18\x04 \x01(\tR\bopenTime\x12\x1d\n" +
+	"\n" +
+	"close_time\x18\x05 \x01(\tR\tcloseTime\"3\n" +
+	"\x16GetWorkingHoursRequest\x12\x19\n" +
+	"\bmic_code\x18\x01 \x01(\tR\amicCode\"Q\n" +
+	"\x17GetWorkingHoursResponse\x126\n" +
+	"\x05hours\x18\x01 \x03(\v2 .securities.ExchangeWorkingHoursR\x05hours\"\x86\x01\n" +
+	"\x16SetWorkingHoursRequest\x12\x16\n" +
+	"\x06polity\x18\x01 \x01(\tR\x06polity\x12\x18\n" +
+	"\asegment\x18\x02 \x01(\tR\asegment\x12\x1b\n" +
+	"\topen_time\x18\x03 \x01(\tR\bopenTime\x12\x1d\n" +
+	"\n" +
+	"close_time\x18\x04 \x01(\tR\tcloseTime\"Q\n" +
+	"\x17SetWorkingHoursResponse\x126\n" +
+	"\x05hours\x18\x01 \x01(\v2 .securities.ExchangeWorkingHoursR\x05hours\"~\n" +
+	"\x0fExchangeHoliday\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x16\n" +
+	"\x06polity\x18\x02 \x01(\tR\x06polity\x12!\n" +
+	"\fholiday_date\x18\x03 \x01(\tR\vholidayDate\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\",\n" +
+	"\x12GetHolidaysRequest\x12\x16\n" +
+	"\x06polity\x18\x01 \x01(\tR\x06polity\"N\n" +
+	"\x13GetHolidaysResponse\x127\n" +
+	"\bholidays\x18\x01 \x03(\v2\x1b.securities.ExchangeHolidayR\bholidays\"p\n" +
+	"\x11AddHolidayRequest\x12\x16\n" +
+	"\x06polity\x18\x01 \x01(\tR\x06polity\x12!\n" +
+	"\fholiday_date\x18\x02 \x01(\tR\vholidayDate\x12 \n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\"K\n" +
+	"\x12AddHolidayResponse\x125\n" +
+	"\aholiday\x18\x01 \x01(\v2\x1b.securities.ExchangeHolidayR\aholiday\"Q\n" +
+	"\x14DeleteHolidayRequest\x12\x16\n" +
+	"\x06polity\x18\x01 \x01(\tR\x06polity\x12!\n" +
+	"\fholiday_date\x18\x02 \x01(\tR\vholidayDate\"\x17\n" +
+	"\x15DeleteHolidayResponse\"2\n" +
+	"\x15IsExchangeOpenRequest\x12\x19\n" +
+	"\bmic_code\x18\x01 \x01(\tR\amicCode\"\x94\x01\n" +
+	"\x16IsExchangeOpenResponse\x12\x19\n" +
+	"\bmic_code\x18\x01 \x01(\tR\amicCode\x12\x17\n" +
+	"\ais_open\x18\x02 \x01(\bR\x06isOpen\x12\x18\n" +
+	"\asegment\x18\x03 \x01(\tR\asegment\x12,\n" +
+	"\x12current_time_local\x18\x04 \x01(\tR\x10currentTimeLocal2\xda\b\n" +
 	"\x11SecuritiesService\x129\n" +
 	"\x04Ping\x12\x17.securities.PingRequest\x1a\x18.securities.PingResponse\x12`\n" +
 	"\x11GetStockExchanges\x12$.securities.GetStockExchangesRequest\x1a%.securities.GetStockExchangesResponse\x12l\n" +
 	"\x15GetStockExchangeByMIC\x12(.securities.GetStockExchangeByMICRequest\x1a).securities.GetStockExchangeByMICResponse\x12f\n" +
 	"\x13CreateStockExchange\x12&.securities.CreateStockExchangeRequest\x1a'.securities.CreateStockExchangeResponse\x12f\n" +
 	"\x13UpdateStockExchange\x12&.securities.UpdateStockExchangeRequest\x1a'.securities.UpdateStockExchangeResponse\x12f\n" +
-	"\x13DeleteStockExchange\x12&.securities.DeleteStockExchangeRequest\x1a'.securities.DeleteStockExchangeResponseB?Z=github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/securitiesb\x06proto3"
+	"\x13DeleteStockExchange\x12&.securities.DeleteStockExchangeRequest\x1a'.securities.DeleteStockExchangeResponse\x12Z\n" +
+	"\x0fGetWorkingHours\x12\".securities.GetWorkingHoursRequest\x1a#.securities.GetWorkingHoursResponse\x12Z\n" +
+	"\x0fSetWorkingHours\x12\".securities.SetWorkingHoursRequest\x1a#.securities.SetWorkingHoursResponse\x12N\n" +
+	"\vGetHolidays\x12\x1e.securities.GetHolidaysRequest\x1a\x1f.securities.GetHolidaysResponse\x12K\n" +
+	"\n" +
+	"AddHoliday\x12\x1d.securities.AddHolidayRequest\x1a\x1e.securities.AddHolidayResponse\x12T\n" +
+	"\rDeleteHoliday\x12 .securities.DeleteHolidayRequest\x1a!.securities.DeleteHolidayResponse\x12W\n" +
+	"\x0eIsExchangeOpen\x12!.securities.IsExchangeOpenRequest\x1a\".securities.IsExchangeOpenResponseB?Z=github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/securitiesb\x06proto3"
 
 var (
 	file_securities_proto_rawDescOnce sync.Once
@@ -767,7 +1550,7 @@ func file_securities_proto_rawDescGZIP() []byte {
 	return file_securities_proto_rawDescData
 }
 
-var file_securities_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
+var file_securities_proto_msgTypes = make([]protoimpl.MessageInfo, 27)
 var file_securities_proto_goTypes = []any{
 	(*PingRequest)(nil),                   // 0: securities.PingRequest
 	(*PingResponse)(nil),                  // 1: securities.PingResponse
@@ -782,29 +1565,59 @@ var file_securities_proto_goTypes = []any{
 	(*UpdateStockExchangeResponse)(nil),   // 10: securities.UpdateStockExchangeResponse
 	(*DeleteStockExchangeRequest)(nil),    // 11: securities.DeleteStockExchangeRequest
 	(*DeleteStockExchangeResponse)(nil),   // 12: securities.DeleteStockExchangeResponse
+	(*ExchangeWorkingHours)(nil),          // 13: securities.ExchangeWorkingHours
+	(*GetWorkingHoursRequest)(nil),        // 14: securities.GetWorkingHoursRequest
+	(*GetWorkingHoursResponse)(nil),       // 15: securities.GetWorkingHoursResponse
+	(*SetWorkingHoursRequest)(nil),        // 16: securities.SetWorkingHoursRequest
+	(*SetWorkingHoursResponse)(nil),       // 17: securities.SetWorkingHoursResponse
+	(*ExchangeHoliday)(nil),               // 18: securities.ExchangeHoliday
+	(*GetHolidaysRequest)(nil),            // 19: securities.GetHolidaysRequest
+	(*GetHolidaysResponse)(nil),           // 20: securities.GetHolidaysResponse
+	(*AddHolidayRequest)(nil),             // 21: securities.AddHolidayRequest
+	(*AddHolidayResponse)(nil),            // 22: securities.AddHolidayResponse
+	(*DeleteHolidayRequest)(nil),          // 23: securities.DeleteHolidayRequest
+	(*DeleteHolidayResponse)(nil),         // 24: securities.DeleteHolidayResponse
+	(*IsExchangeOpenRequest)(nil),         // 25: securities.IsExchangeOpenRequest
+	(*IsExchangeOpenResponse)(nil),        // 26: securities.IsExchangeOpenResponse
 }
 var file_securities_proto_depIdxs = []int32{
 	2,  // 0: securities.GetStockExchangesResponse.exchanges:type_name -> securities.StockExchange
 	2,  // 1: securities.GetStockExchangeByMICResponse.exchange:type_name -> securities.StockExchange
 	2,  // 2: securities.CreateStockExchangeResponse.exchange:type_name -> securities.StockExchange
 	2,  // 3: securities.UpdateStockExchangeResponse.exchange:type_name -> securities.StockExchange
-	0,  // 4: securities.SecuritiesService.Ping:input_type -> securities.PingRequest
-	3,  // 5: securities.SecuritiesService.GetStockExchanges:input_type -> securities.GetStockExchangesRequest
-	5,  // 6: securities.SecuritiesService.GetStockExchangeByMIC:input_type -> securities.GetStockExchangeByMICRequest
-	7,  // 7: securities.SecuritiesService.CreateStockExchange:input_type -> securities.CreateStockExchangeRequest
-	9,  // 8: securities.SecuritiesService.UpdateStockExchange:input_type -> securities.UpdateStockExchangeRequest
-	11, // 9: securities.SecuritiesService.DeleteStockExchange:input_type -> securities.DeleteStockExchangeRequest
-	1,  // 10: securities.SecuritiesService.Ping:output_type -> securities.PingResponse
-	4,  // 11: securities.SecuritiesService.GetStockExchanges:output_type -> securities.GetStockExchangesResponse
-	6,  // 12: securities.SecuritiesService.GetStockExchangeByMIC:output_type -> securities.GetStockExchangeByMICResponse
-	8,  // 13: securities.SecuritiesService.CreateStockExchange:output_type -> securities.CreateStockExchangeResponse
-	10, // 14: securities.SecuritiesService.UpdateStockExchange:output_type -> securities.UpdateStockExchangeResponse
-	12, // 15: securities.SecuritiesService.DeleteStockExchange:output_type -> securities.DeleteStockExchangeResponse
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	13, // 4: securities.GetWorkingHoursResponse.hours:type_name -> securities.ExchangeWorkingHours
+	13, // 5: securities.SetWorkingHoursResponse.hours:type_name -> securities.ExchangeWorkingHours
+	18, // 6: securities.GetHolidaysResponse.holidays:type_name -> securities.ExchangeHoliday
+	18, // 7: securities.AddHolidayResponse.holiday:type_name -> securities.ExchangeHoliday
+	0,  // 8: securities.SecuritiesService.Ping:input_type -> securities.PingRequest
+	3,  // 9: securities.SecuritiesService.GetStockExchanges:input_type -> securities.GetStockExchangesRequest
+	5,  // 10: securities.SecuritiesService.GetStockExchangeByMIC:input_type -> securities.GetStockExchangeByMICRequest
+	7,  // 11: securities.SecuritiesService.CreateStockExchange:input_type -> securities.CreateStockExchangeRequest
+	9,  // 12: securities.SecuritiesService.UpdateStockExchange:input_type -> securities.UpdateStockExchangeRequest
+	11, // 13: securities.SecuritiesService.DeleteStockExchange:input_type -> securities.DeleteStockExchangeRequest
+	14, // 14: securities.SecuritiesService.GetWorkingHours:input_type -> securities.GetWorkingHoursRequest
+	16, // 15: securities.SecuritiesService.SetWorkingHours:input_type -> securities.SetWorkingHoursRequest
+	19, // 16: securities.SecuritiesService.GetHolidays:input_type -> securities.GetHolidaysRequest
+	21, // 17: securities.SecuritiesService.AddHoliday:input_type -> securities.AddHolidayRequest
+	23, // 18: securities.SecuritiesService.DeleteHoliday:input_type -> securities.DeleteHolidayRequest
+	25, // 19: securities.SecuritiesService.IsExchangeOpen:input_type -> securities.IsExchangeOpenRequest
+	1,  // 20: securities.SecuritiesService.Ping:output_type -> securities.PingResponse
+	4,  // 21: securities.SecuritiesService.GetStockExchanges:output_type -> securities.GetStockExchangesResponse
+	6,  // 22: securities.SecuritiesService.GetStockExchangeByMIC:output_type -> securities.GetStockExchangeByMICResponse
+	8,  // 23: securities.SecuritiesService.CreateStockExchange:output_type -> securities.CreateStockExchangeResponse
+	10, // 24: securities.SecuritiesService.UpdateStockExchange:output_type -> securities.UpdateStockExchangeResponse
+	12, // 25: securities.SecuritiesService.DeleteStockExchange:output_type -> securities.DeleteStockExchangeResponse
+	15, // 26: securities.SecuritiesService.GetWorkingHours:output_type -> securities.GetWorkingHoursResponse
+	17, // 27: securities.SecuritiesService.SetWorkingHours:output_type -> securities.SetWorkingHoursResponse
+	20, // 28: securities.SecuritiesService.GetHolidays:output_type -> securities.GetHolidaysResponse
+	22, // 29: securities.SecuritiesService.AddHoliday:output_type -> securities.AddHolidayResponse
+	24, // 30: securities.SecuritiesService.DeleteHoliday:output_type -> securities.DeleteHolidayResponse
+	26, // 31: securities.SecuritiesService.IsExchangeOpen:output_type -> securities.IsExchangeOpenResponse
+	20, // [20:32] is the sub-list for method output_type
+	8,  // [8:20] is the sub-list for method input_type
+	8,  // [8:8] is the sub-list for extension type_name
+	8,  // [8:8] is the sub-list for extension extendee
+	0,  // [0:8] is the sub-list for field type_name
 }
 
 func init() { file_securities_proto_init() }
@@ -818,7 +1631,7 @@ func file_securities_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_securities_proto_rawDesc), len(file_securities_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   13,
+			NumMessages:   27,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

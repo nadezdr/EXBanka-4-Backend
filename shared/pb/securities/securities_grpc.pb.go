@@ -25,6 +25,12 @@ const (
 	SecuritiesService_CreateStockExchange_FullMethodName   = "/securities.SecuritiesService/CreateStockExchange"
 	SecuritiesService_UpdateStockExchange_FullMethodName   = "/securities.SecuritiesService/UpdateStockExchange"
 	SecuritiesService_DeleteStockExchange_FullMethodName   = "/securities.SecuritiesService/DeleteStockExchange"
+	SecuritiesService_GetWorkingHours_FullMethodName       = "/securities.SecuritiesService/GetWorkingHours"
+	SecuritiesService_SetWorkingHours_FullMethodName       = "/securities.SecuritiesService/SetWorkingHours"
+	SecuritiesService_GetHolidays_FullMethodName           = "/securities.SecuritiesService/GetHolidays"
+	SecuritiesService_AddHoliday_FullMethodName            = "/securities.SecuritiesService/AddHoliday"
+	SecuritiesService_DeleteHoliday_FullMethodName         = "/securities.SecuritiesService/DeleteHoliday"
+	SecuritiesService_IsExchangeOpen_FullMethodName        = "/securities.SecuritiesService/IsExchangeOpen"
 )
 
 // SecuritiesServiceClient is the client API for SecuritiesService service.
@@ -32,11 +38,21 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SecuritiesServiceClient interface {
 	Ping(ctx context.Context, in *PingRequest, opts ...grpc.CallOption) (*PingResponse, error)
+	// Stock Exchanges
 	GetStockExchanges(ctx context.Context, in *GetStockExchangesRequest, opts ...grpc.CallOption) (*GetStockExchangesResponse, error)
 	GetStockExchangeByMIC(ctx context.Context, in *GetStockExchangeByMICRequest, opts ...grpc.CallOption) (*GetStockExchangeByMICResponse, error)
 	CreateStockExchange(ctx context.Context, in *CreateStockExchangeRequest, opts ...grpc.CallOption) (*CreateStockExchangeResponse, error)
 	UpdateStockExchange(ctx context.Context, in *UpdateStockExchangeRequest, opts ...grpc.CallOption) (*UpdateStockExchangeResponse, error)
 	DeleteStockExchange(ctx context.Context, in *DeleteStockExchangeRequest, opts ...grpc.CallOption) (*DeleteStockExchangeResponse, error)
+	// Working Hours
+	GetWorkingHours(ctx context.Context, in *GetWorkingHoursRequest, opts ...grpc.CallOption) (*GetWorkingHoursResponse, error)
+	SetWorkingHours(ctx context.Context, in *SetWorkingHoursRequest, opts ...grpc.CallOption) (*SetWorkingHoursResponse, error)
+	// Holidays
+	GetHolidays(ctx context.Context, in *GetHolidaysRequest, opts ...grpc.CallOption) (*GetHolidaysResponse, error)
+	AddHoliday(ctx context.Context, in *AddHolidayRequest, opts ...grpc.CallOption) (*AddHolidayResponse, error)
+	DeleteHoliday(ctx context.Context, in *DeleteHolidayRequest, opts ...grpc.CallOption) (*DeleteHolidayResponse, error)
+	// Status
+	IsExchangeOpen(ctx context.Context, in *IsExchangeOpenRequest, opts ...grpc.CallOption) (*IsExchangeOpenResponse, error)
 }
 
 type securitiesServiceClient struct {
@@ -107,16 +123,86 @@ func (c *securitiesServiceClient) DeleteStockExchange(ctx context.Context, in *D
 	return out, nil
 }
 
+func (c *securitiesServiceClient) GetWorkingHours(ctx context.Context, in *GetWorkingHoursRequest, opts ...grpc.CallOption) (*GetWorkingHoursResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWorkingHoursResponse)
+	err := c.cc.Invoke(ctx, SecuritiesService_GetWorkingHours_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *securitiesServiceClient) SetWorkingHours(ctx context.Context, in *SetWorkingHoursRequest, opts ...grpc.CallOption) (*SetWorkingHoursResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetWorkingHoursResponse)
+	err := c.cc.Invoke(ctx, SecuritiesService_SetWorkingHours_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *securitiesServiceClient) GetHolidays(ctx context.Context, in *GetHolidaysRequest, opts ...grpc.CallOption) (*GetHolidaysResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHolidaysResponse)
+	err := c.cc.Invoke(ctx, SecuritiesService_GetHolidays_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *securitiesServiceClient) AddHoliday(ctx context.Context, in *AddHolidayRequest, opts ...grpc.CallOption) (*AddHolidayResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(AddHolidayResponse)
+	err := c.cc.Invoke(ctx, SecuritiesService_AddHoliday_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *securitiesServiceClient) DeleteHoliday(ctx context.Context, in *DeleteHolidayRequest, opts ...grpc.CallOption) (*DeleteHolidayResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteHolidayResponse)
+	err := c.cc.Invoke(ctx, SecuritiesService_DeleteHoliday_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *securitiesServiceClient) IsExchangeOpen(ctx context.Context, in *IsExchangeOpenRequest, opts ...grpc.CallOption) (*IsExchangeOpenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(IsExchangeOpenResponse)
+	err := c.cc.Invoke(ctx, SecuritiesService_IsExchangeOpen_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SecuritiesServiceServer is the server API for SecuritiesService service.
 // All implementations must embed UnimplementedSecuritiesServiceServer
 // for forward compatibility.
 type SecuritiesServiceServer interface {
 	Ping(context.Context, *PingRequest) (*PingResponse, error)
+	// Stock Exchanges
 	GetStockExchanges(context.Context, *GetStockExchangesRequest) (*GetStockExchangesResponse, error)
 	GetStockExchangeByMIC(context.Context, *GetStockExchangeByMICRequest) (*GetStockExchangeByMICResponse, error)
 	CreateStockExchange(context.Context, *CreateStockExchangeRequest) (*CreateStockExchangeResponse, error)
 	UpdateStockExchange(context.Context, *UpdateStockExchangeRequest) (*UpdateStockExchangeResponse, error)
 	DeleteStockExchange(context.Context, *DeleteStockExchangeRequest) (*DeleteStockExchangeResponse, error)
+	// Working Hours
+	GetWorkingHours(context.Context, *GetWorkingHoursRequest) (*GetWorkingHoursResponse, error)
+	SetWorkingHours(context.Context, *SetWorkingHoursRequest) (*SetWorkingHoursResponse, error)
+	// Holidays
+	GetHolidays(context.Context, *GetHolidaysRequest) (*GetHolidaysResponse, error)
+	AddHoliday(context.Context, *AddHolidayRequest) (*AddHolidayResponse, error)
+	DeleteHoliday(context.Context, *DeleteHolidayRequest) (*DeleteHolidayResponse, error)
+	// Status
+	IsExchangeOpen(context.Context, *IsExchangeOpenRequest) (*IsExchangeOpenResponse, error)
 	mustEmbedUnimplementedSecuritiesServiceServer()
 }
 
@@ -144,6 +230,24 @@ func (UnimplementedSecuritiesServiceServer) UpdateStockExchange(context.Context,
 }
 func (UnimplementedSecuritiesServiceServer) DeleteStockExchange(context.Context, *DeleteStockExchangeRequest) (*DeleteStockExchangeResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method DeleteStockExchange not implemented")
+}
+func (UnimplementedSecuritiesServiceServer) GetWorkingHours(context.Context, *GetWorkingHoursRequest) (*GetWorkingHoursResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetWorkingHours not implemented")
+}
+func (UnimplementedSecuritiesServiceServer) SetWorkingHours(context.Context, *SetWorkingHoursRequest) (*SetWorkingHoursResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SetWorkingHours not implemented")
+}
+func (UnimplementedSecuritiesServiceServer) GetHolidays(context.Context, *GetHolidaysRequest) (*GetHolidaysResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetHolidays not implemented")
+}
+func (UnimplementedSecuritiesServiceServer) AddHoliday(context.Context, *AddHolidayRequest) (*AddHolidayResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method AddHoliday not implemented")
+}
+func (UnimplementedSecuritiesServiceServer) DeleteHoliday(context.Context, *DeleteHolidayRequest) (*DeleteHolidayResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method DeleteHoliday not implemented")
+}
+func (UnimplementedSecuritiesServiceServer) IsExchangeOpen(context.Context, *IsExchangeOpenRequest) (*IsExchangeOpenResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method IsExchangeOpen not implemented")
 }
 func (UnimplementedSecuritiesServiceServer) mustEmbedUnimplementedSecuritiesServiceServer() {}
 func (UnimplementedSecuritiesServiceServer) testEmbeddedByValue()                           {}
@@ -274,6 +378,114 @@ func _SecuritiesService_DeleteStockExchange_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SecuritiesService_GetWorkingHours_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWorkingHoursRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SecuritiesServiceServer).GetWorkingHours(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SecuritiesService_GetWorkingHours_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SecuritiesServiceServer).GetWorkingHours(ctx, req.(*GetWorkingHoursRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SecuritiesService_SetWorkingHours_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetWorkingHoursRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SecuritiesServiceServer).SetWorkingHours(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SecuritiesService_SetWorkingHours_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SecuritiesServiceServer).SetWorkingHours(ctx, req.(*SetWorkingHoursRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SecuritiesService_GetHolidays_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHolidaysRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SecuritiesServiceServer).GetHolidays(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SecuritiesService_GetHolidays_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SecuritiesServiceServer).GetHolidays(ctx, req.(*GetHolidaysRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SecuritiesService_AddHoliday_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddHolidayRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SecuritiesServiceServer).AddHoliday(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SecuritiesService_AddHoliday_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SecuritiesServiceServer).AddHoliday(ctx, req.(*AddHolidayRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SecuritiesService_DeleteHoliday_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteHolidayRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SecuritiesServiceServer).DeleteHoliday(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SecuritiesService_DeleteHoliday_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SecuritiesServiceServer).DeleteHoliday(ctx, req.(*DeleteHolidayRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SecuritiesService_IsExchangeOpen_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsExchangeOpenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SecuritiesServiceServer).IsExchangeOpen(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SecuritiesService_IsExchangeOpen_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SecuritiesServiceServer).IsExchangeOpen(ctx, req.(*IsExchangeOpenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SecuritiesService_ServiceDesc is the grpc.ServiceDesc for SecuritiesService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -304,6 +516,30 @@ var SecuritiesService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteStockExchange",
 			Handler:    _SecuritiesService_DeleteStockExchange_Handler,
+		},
+		{
+			MethodName: "GetWorkingHours",
+			Handler:    _SecuritiesService_GetWorkingHours_Handler,
+		},
+		{
+			MethodName: "SetWorkingHours",
+			Handler:    _SecuritiesService_SetWorkingHours_Handler,
+		},
+		{
+			MethodName: "GetHolidays",
+			Handler:    _SecuritiesService_GetHolidays_Handler,
+		},
+		{
+			MethodName: "AddHoliday",
+			Handler:    _SecuritiesService_AddHoliday_Handler,
+		},
+		{
+			MethodName: "DeleteHoliday",
+			Handler:    _SecuritiesService_DeleteHoliday_Handler,
+		},
+		{
+			MethodName: "IsExchangeOpen",
+			Handler:    _SecuritiesService_IsExchangeOpen_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
