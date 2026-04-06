@@ -165,7 +165,11 @@ func main() {
 	r.PUT("/api/cards/:id/unblock", middleware.RequireRole("EMPLOYEE"), handlers.UnblockCard(cardClient))
 	r.PUT("/api/cards/:id/deactivate", middleware.RequireRole("EMPLOYEE"), handlers.DeactivateCard(cardClient))
 	r.PUT("/api/cards/:id/limit", middleware.RequireRole("EMPLOYEE"), handlers.UpdateCardLimit(cardClient))
-	r.GET("/stock-exchanges/ping", handlers.PingSecurities(securitiesClient))
+	r.GET("/stock-exchanges", middleware.RequireRole("EMPLOYEE"), handlers.GetStockExchanges(securitiesClient))
+	r.GET("/stock-exchanges/:mic", middleware.RequireRole("EMPLOYEE"), handlers.GetStockExchangeByMIC(securitiesClient))
+	r.POST("/stock-exchanges", middleware.RequireRole("ADMIN"), handlers.CreateStockExchange(securitiesClient))
+	r.PUT("/stock-exchanges/:mic", middleware.RequireRole("ADMIN"), handlers.UpdateStockExchange(securitiesClient))
+	r.DELETE("/stock-exchanges/:mic", middleware.RequireRole("ADMIN"), handlers.DeleteStockExchange(securitiesClient))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	r.Run(":8083")
 }

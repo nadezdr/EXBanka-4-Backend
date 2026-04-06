@@ -4,13 +4,64 @@ package securities;
 
 option go_package = "github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/securities";
 
-// ── Ping (health check / placeholder) ───────────────────────────────────────
+// ── Ping (health check) ───────────────────────────────────────────────────────
 
 message PingRequest {}
 message PingResponse { string message = 1; }
 
-// ── Service ──────────────────────────────────────────────────────────────────
+// ── StockExchange ─────────────────────────────────────────────────────────────
+
+message StockExchange {
+  int64  id       = 1;
+  string name     = 2;
+  string acronym  = 3;
+  string mic_code = 4;
+  string polity   = 5;
+  string currency = 6;
+  string timezone = 7;
+}
+
+// GetStockExchanges — list all
+message GetStockExchangesRequest {}
+message GetStockExchangesResponse { repeated StockExchange exchanges = 1; }
+
+// GetStockExchangeByMIC — get single by MIC code
+message GetStockExchangeByMICRequest  { string mic_code = 1; }
+message GetStockExchangeByMICResponse { StockExchange exchange = 1; }
+
+// CreateStockExchange
+message CreateStockExchangeRequest {
+  string name     = 1;
+  string acronym  = 2;
+  string mic_code = 3;
+  string polity   = 4;
+  string currency = 5;
+  string timezone = 6;
+}
+message CreateStockExchangeResponse { StockExchange exchange = 1; }
+
+// UpdateStockExchange — identified by mic_code
+message UpdateStockExchangeRequest {
+  string mic_code = 1;
+  string name     = 2;
+  string acronym  = 3;
+  string polity   = 4;
+  string currency = 5;
+  string timezone = 6;
+}
+message UpdateStockExchangeResponse { StockExchange exchange = 1; }
+
+// DeleteStockExchange
+message DeleteStockExchangeRequest  { string mic_code = 1; }
+message DeleteStockExchangeResponse {}
+
+// ── Service ───────────────────────────────────────────────────────────────────
 
 service SecuritiesService {
-  rpc Ping (PingRequest) returns (PingResponse);
+  rpc Ping                  (PingRequest)                  returns (PingResponse);
+  rpc GetStockExchanges     (GetStockExchangesRequest)     returns (GetStockExchangesResponse);
+  rpc GetStockExchangeByMIC (GetStockExchangeByMICRequest) returns (GetStockExchangeByMICResponse);
+  rpc CreateStockExchange   (CreateStockExchangeRequest)   returns (CreateStockExchangeResponse);
+  rpc UpdateStockExchange   (UpdateStockExchangeRequest)   returns (UpdateStockExchangeResponse);
+  rpc DeleteStockExchange   (DeleteStockExchangeRequest)   returns (DeleteStockExchangeResponse);
 }

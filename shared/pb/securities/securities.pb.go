@@ -101,6 +101,607 @@ func (x *PingResponse) GetMessage() string {
 	return ""
 }
 
+type StockExchange struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Acronym       string                 `protobuf:"bytes,3,opt,name=acronym,proto3" json:"acronym,omitempty"`
+	MicCode       string                 `protobuf:"bytes,4,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	Polity        string                 `protobuf:"bytes,5,opt,name=polity,proto3" json:"polity,omitempty"`
+	Currency      string                 `protobuf:"bytes,6,opt,name=currency,proto3" json:"currency,omitempty"`
+	Timezone      string                 `protobuf:"bytes,7,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StockExchange) Reset() {
+	*x = StockExchange{}
+	mi := &file_securities_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StockExchange) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StockExchange) ProtoMessage() {}
+
+func (x *StockExchange) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StockExchange.ProtoReflect.Descriptor instead.
+func (*StockExchange) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *StockExchange) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+func (x *StockExchange) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *StockExchange) GetAcronym() string {
+	if x != nil {
+		return x.Acronym
+	}
+	return ""
+}
+
+func (x *StockExchange) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+func (x *StockExchange) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *StockExchange) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *StockExchange) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
+// GetStockExchanges — list all
+type GetStockExchangesRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStockExchangesRequest) Reset() {
+	*x = GetStockExchangesRequest{}
+	mi := &file_securities_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStockExchangesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStockExchangesRequest) ProtoMessage() {}
+
+func (x *GetStockExchangesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStockExchangesRequest.ProtoReflect.Descriptor instead.
+func (*GetStockExchangesRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{3}
+}
+
+type GetStockExchangesResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exchanges     []*StockExchange       `protobuf:"bytes,1,rep,name=exchanges,proto3" json:"exchanges,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStockExchangesResponse) Reset() {
+	*x = GetStockExchangesResponse{}
+	mi := &file_securities_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStockExchangesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStockExchangesResponse) ProtoMessage() {}
+
+func (x *GetStockExchangesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStockExchangesResponse.ProtoReflect.Descriptor instead.
+func (*GetStockExchangesResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *GetStockExchangesResponse) GetExchanges() []*StockExchange {
+	if x != nil {
+		return x.Exchanges
+	}
+	return nil
+}
+
+// GetStockExchangeByMIC — get single by MIC code
+type GetStockExchangeByMICRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStockExchangeByMICRequest) Reset() {
+	*x = GetStockExchangeByMICRequest{}
+	mi := &file_securities_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStockExchangeByMICRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStockExchangeByMICRequest) ProtoMessage() {}
+
+func (x *GetStockExchangeByMICRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStockExchangeByMICRequest.ProtoReflect.Descriptor instead.
+func (*GetStockExchangeByMICRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *GetStockExchangeByMICRequest) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+type GetStockExchangeByMICResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exchange      *StockExchange         `protobuf:"bytes,1,opt,name=exchange,proto3" json:"exchange,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStockExchangeByMICResponse) Reset() {
+	*x = GetStockExchangeByMICResponse{}
+	mi := &file_securities_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStockExchangeByMICResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStockExchangeByMICResponse) ProtoMessage() {}
+
+func (x *GetStockExchangeByMICResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStockExchangeByMICResponse.ProtoReflect.Descriptor instead.
+func (*GetStockExchangeByMICResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *GetStockExchangeByMICResponse) GetExchange() *StockExchange {
+	if x != nil {
+		return x.Exchange
+	}
+	return nil
+}
+
+// CreateStockExchange
+type CreateStockExchangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Acronym       string                 `protobuf:"bytes,2,opt,name=acronym,proto3" json:"acronym,omitempty"`
+	MicCode       string                 `protobuf:"bytes,3,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	Polity        string                 `protobuf:"bytes,4,opt,name=polity,proto3" json:"polity,omitempty"`
+	Currency      string                 `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`
+	Timezone      string                 `protobuf:"bytes,6,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateStockExchangeRequest) Reset() {
+	*x = CreateStockExchangeRequest{}
+	mi := &file_securities_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateStockExchangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateStockExchangeRequest) ProtoMessage() {}
+
+func (x *CreateStockExchangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateStockExchangeRequest.ProtoReflect.Descriptor instead.
+func (*CreateStockExchangeRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *CreateStockExchangeRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateStockExchangeRequest) GetAcronym() string {
+	if x != nil {
+		return x.Acronym
+	}
+	return ""
+}
+
+func (x *CreateStockExchangeRequest) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+func (x *CreateStockExchangeRequest) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *CreateStockExchangeRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *CreateStockExchangeRequest) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
+type CreateStockExchangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exchange      *StockExchange         `protobuf:"bytes,1,opt,name=exchange,proto3" json:"exchange,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateStockExchangeResponse) Reset() {
+	*x = CreateStockExchangeResponse{}
+	mi := &file_securities_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateStockExchangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateStockExchangeResponse) ProtoMessage() {}
+
+func (x *CreateStockExchangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateStockExchangeResponse.ProtoReflect.Descriptor instead.
+func (*CreateStockExchangeResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *CreateStockExchangeResponse) GetExchange() *StockExchange {
+	if x != nil {
+		return x.Exchange
+	}
+	return nil
+}
+
+// UpdateStockExchange — identified by mic_code
+type UpdateStockExchangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Acronym       string                 `protobuf:"bytes,3,opt,name=acronym,proto3" json:"acronym,omitempty"`
+	Polity        string                 `protobuf:"bytes,4,opt,name=polity,proto3" json:"polity,omitempty"`
+	Currency      string                 `protobuf:"bytes,5,opt,name=currency,proto3" json:"currency,omitempty"`
+	Timezone      string                 `protobuf:"bytes,6,opt,name=timezone,proto3" json:"timezone,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateStockExchangeRequest) Reset() {
+	*x = UpdateStockExchangeRequest{}
+	mi := &file_securities_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateStockExchangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateStockExchangeRequest) ProtoMessage() {}
+
+func (x *UpdateStockExchangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateStockExchangeRequest.ProtoReflect.Descriptor instead.
+func (*UpdateStockExchangeRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *UpdateStockExchangeRequest) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+func (x *UpdateStockExchangeRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateStockExchangeRequest) GetAcronym() string {
+	if x != nil {
+		return x.Acronym
+	}
+	return ""
+}
+
+func (x *UpdateStockExchangeRequest) GetPolity() string {
+	if x != nil {
+		return x.Polity
+	}
+	return ""
+}
+
+func (x *UpdateStockExchangeRequest) GetCurrency() string {
+	if x != nil {
+		return x.Currency
+	}
+	return ""
+}
+
+func (x *UpdateStockExchangeRequest) GetTimezone() string {
+	if x != nil {
+		return x.Timezone
+	}
+	return ""
+}
+
+type UpdateStockExchangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Exchange      *StockExchange         `protobuf:"bytes,1,opt,name=exchange,proto3" json:"exchange,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateStockExchangeResponse) Reset() {
+	*x = UpdateStockExchangeResponse{}
+	mi := &file_securities_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateStockExchangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateStockExchangeResponse) ProtoMessage() {}
+
+func (x *UpdateStockExchangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateStockExchangeResponse.ProtoReflect.Descriptor instead.
+func (*UpdateStockExchangeResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UpdateStockExchangeResponse) GetExchange() *StockExchange {
+	if x != nil {
+		return x.Exchange
+	}
+	return nil
+}
+
+// DeleteStockExchange
+type DeleteStockExchangeRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	MicCode       string                 `protobuf:"bytes,1,opt,name=mic_code,json=micCode,proto3" json:"mic_code,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteStockExchangeRequest) Reset() {
+	*x = DeleteStockExchangeRequest{}
+	mi := &file_securities_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteStockExchangeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteStockExchangeRequest) ProtoMessage() {}
+
+func (x *DeleteStockExchangeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteStockExchangeRequest.ProtoReflect.Descriptor instead.
+func (*DeleteStockExchangeRequest) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *DeleteStockExchangeRequest) GetMicCode() string {
+	if x != nil {
+		return x.MicCode
+	}
+	return ""
+}
+
+type DeleteStockExchangeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteStockExchangeResponse) Reset() {
+	*x = DeleteStockExchangeResponse{}
+	mi := &file_securities_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteStockExchangeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteStockExchangeResponse) ProtoMessage() {}
+
+func (x *DeleteStockExchangeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_securities_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteStockExchangeResponse.ProtoReflect.Descriptor instead.
+func (*DeleteStockExchangeResponse) Descriptor() ([]byte, []int) {
+	return file_securities_proto_rawDescGZIP(), []int{12}
+}
+
 var File_securities_proto protoreflect.FileDescriptor
 
 const file_securities_proto_rawDesc = "" +
@@ -109,9 +710,50 @@ const file_securities_proto_rawDesc = "" +
 	"securities\"\r\n" +
 	"\vPingRequest\"(\n" +
 	"\fPingResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2N\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\"\xb8\x01\n" +
+	"\rStockExchange\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aacronym\x18\x03 \x01(\tR\aacronym\x12\x19\n" +
+	"\bmic_code\x18\x04 \x01(\tR\amicCode\x12\x16\n" +
+	"\x06polity\x18\x05 \x01(\tR\x06polity\x12\x1a\n" +
+	"\bcurrency\x18\x06 \x01(\tR\bcurrency\x12\x1a\n" +
+	"\btimezone\x18\a \x01(\tR\btimezone\"\x1a\n" +
+	"\x18GetStockExchangesRequest\"T\n" +
+	"\x19GetStockExchangesResponse\x127\n" +
+	"\texchanges\x18\x01 \x03(\v2\x19.securities.StockExchangeR\texchanges\"9\n" +
+	"\x1cGetStockExchangeByMICRequest\x12\x19\n" +
+	"\bmic_code\x18\x01 \x01(\tR\amicCode\"V\n" +
+	"\x1dGetStockExchangeByMICResponse\x125\n" +
+	"\bexchange\x18\x01 \x01(\v2\x19.securities.StockExchangeR\bexchange\"\xb5\x01\n" +
+	"\x1aCreateStockExchangeRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aacronym\x18\x02 \x01(\tR\aacronym\x12\x19\n" +
+	"\bmic_code\x18\x03 \x01(\tR\amicCode\x12\x16\n" +
+	"\x06polity\x18\x04 \x01(\tR\x06polity\x12\x1a\n" +
+	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12\x1a\n" +
+	"\btimezone\x18\x06 \x01(\tR\btimezone\"T\n" +
+	"\x1bCreateStockExchangeResponse\x125\n" +
+	"\bexchange\x18\x01 \x01(\v2\x19.securities.StockExchangeR\bexchange\"\xb5\x01\n" +
+	"\x1aUpdateStockExchangeRequest\x12\x19\n" +
+	"\bmic_code\x18\x01 \x01(\tR\amicCode\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aacronym\x18\x03 \x01(\tR\aacronym\x12\x16\n" +
+	"\x06polity\x18\x04 \x01(\tR\x06polity\x12\x1a\n" +
+	"\bcurrency\x18\x05 \x01(\tR\bcurrency\x12\x1a\n" +
+	"\btimezone\x18\x06 \x01(\tR\btimezone\"T\n" +
+	"\x1bUpdateStockExchangeResponse\x125\n" +
+	"\bexchange\x18\x01 \x01(\v2\x19.securities.StockExchangeR\bexchange\"7\n" +
+	"\x1aDeleteStockExchangeRequest\x12\x19\n" +
+	"\bmic_code\x18\x01 \x01(\tR\amicCode\"\x1d\n" +
+	"\x1bDeleteStockExchangeResponse2\xd6\x04\n" +
 	"\x11SecuritiesService\x129\n" +
-	"\x04Ping\x12\x17.securities.PingRequest\x1a\x18.securities.PingResponseB?Z=github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/securitiesb\x06proto3"
+	"\x04Ping\x12\x17.securities.PingRequest\x1a\x18.securities.PingResponse\x12`\n" +
+	"\x11GetStockExchanges\x12$.securities.GetStockExchangesRequest\x1a%.securities.GetStockExchangesResponse\x12l\n" +
+	"\x15GetStockExchangeByMIC\x12(.securities.GetStockExchangeByMICRequest\x1a).securities.GetStockExchangeByMICResponse\x12f\n" +
+	"\x13CreateStockExchange\x12&.securities.CreateStockExchangeRequest\x1a'.securities.CreateStockExchangeResponse\x12f\n" +
+	"\x13UpdateStockExchange\x12&.securities.UpdateStockExchangeRequest\x1a'.securities.UpdateStockExchangeResponse\x12f\n" +
+	"\x13DeleteStockExchange\x12&.securities.DeleteStockExchangeRequest\x1a'.securities.DeleteStockExchangeResponseB?Z=github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/securitiesb\x06proto3"
 
 var (
 	file_securities_proto_rawDescOnce sync.Once
@@ -125,19 +767,44 @@ func file_securities_proto_rawDescGZIP() []byte {
 	return file_securities_proto_rawDescData
 }
 
-var file_securities_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_securities_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_securities_proto_goTypes = []any{
-	(*PingRequest)(nil),  // 0: securities.PingRequest
-	(*PingResponse)(nil), // 1: securities.PingResponse
+	(*PingRequest)(nil),                   // 0: securities.PingRequest
+	(*PingResponse)(nil),                  // 1: securities.PingResponse
+	(*StockExchange)(nil),                 // 2: securities.StockExchange
+	(*GetStockExchangesRequest)(nil),      // 3: securities.GetStockExchangesRequest
+	(*GetStockExchangesResponse)(nil),     // 4: securities.GetStockExchangesResponse
+	(*GetStockExchangeByMICRequest)(nil),  // 5: securities.GetStockExchangeByMICRequest
+	(*GetStockExchangeByMICResponse)(nil), // 6: securities.GetStockExchangeByMICResponse
+	(*CreateStockExchangeRequest)(nil),    // 7: securities.CreateStockExchangeRequest
+	(*CreateStockExchangeResponse)(nil),   // 8: securities.CreateStockExchangeResponse
+	(*UpdateStockExchangeRequest)(nil),    // 9: securities.UpdateStockExchangeRequest
+	(*UpdateStockExchangeResponse)(nil),   // 10: securities.UpdateStockExchangeResponse
+	(*DeleteStockExchangeRequest)(nil),    // 11: securities.DeleteStockExchangeRequest
+	(*DeleteStockExchangeResponse)(nil),   // 12: securities.DeleteStockExchangeResponse
 }
 var file_securities_proto_depIdxs = []int32{
-	0, // 0: securities.SecuritiesService.Ping:input_type -> securities.PingRequest
-	1, // 1: securities.SecuritiesService.Ping:output_type -> securities.PingResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	2,  // 0: securities.GetStockExchangesResponse.exchanges:type_name -> securities.StockExchange
+	2,  // 1: securities.GetStockExchangeByMICResponse.exchange:type_name -> securities.StockExchange
+	2,  // 2: securities.CreateStockExchangeResponse.exchange:type_name -> securities.StockExchange
+	2,  // 3: securities.UpdateStockExchangeResponse.exchange:type_name -> securities.StockExchange
+	0,  // 4: securities.SecuritiesService.Ping:input_type -> securities.PingRequest
+	3,  // 5: securities.SecuritiesService.GetStockExchanges:input_type -> securities.GetStockExchangesRequest
+	5,  // 6: securities.SecuritiesService.GetStockExchangeByMIC:input_type -> securities.GetStockExchangeByMICRequest
+	7,  // 7: securities.SecuritiesService.CreateStockExchange:input_type -> securities.CreateStockExchangeRequest
+	9,  // 8: securities.SecuritiesService.UpdateStockExchange:input_type -> securities.UpdateStockExchangeRequest
+	11, // 9: securities.SecuritiesService.DeleteStockExchange:input_type -> securities.DeleteStockExchangeRequest
+	1,  // 10: securities.SecuritiesService.Ping:output_type -> securities.PingResponse
+	4,  // 11: securities.SecuritiesService.GetStockExchanges:output_type -> securities.GetStockExchangesResponse
+	6,  // 12: securities.SecuritiesService.GetStockExchangeByMIC:output_type -> securities.GetStockExchangeByMICResponse
+	8,  // 13: securities.SecuritiesService.CreateStockExchange:output_type -> securities.CreateStockExchangeResponse
+	10, // 14: securities.SecuritiesService.UpdateStockExchange:output_type -> securities.UpdateStockExchangeResponse
+	12, // 15: securities.SecuritiesService.DeleteStockExchange:output_type -> securities.DeleteStockExchangeResponse
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_securities_proto_init() }
@@ -151,7 +818,7 @@ func file_securities_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_securities_proto_rawDesc), len(file_securities_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
