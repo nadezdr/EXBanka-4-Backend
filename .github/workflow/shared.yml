@@ -1,0 +1,25 @@
+name: Employee Service
+
+on:
+  pull_request:
+
+jobs:
+  proto-check:
+    name: Proto staleness check
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: shared
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Install Go
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
+        with:
+          go-version-file: 'go.mod'  #todo: treba putanja do odgovarajuceg go.mod fajla
+      - name: Check for diff
+        run: |                        # moracemo da proverimo kako smo generisali proto fajlove
+          if ! git diff --exit-code pb/; then
+            echo "::error::Generated proto code is out of date. Run 'make proto' and commit the result."
+            exit 1
+          fi
