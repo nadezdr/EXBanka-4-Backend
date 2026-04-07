@@ -16,9 +16,9 @@ jobs:
       - name: Install Go
         uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c
         with:
-          go-version-file: 'go.mod'  #todo: treba putanja do odgovarajuceg go.mod fajla
+          go-version-file: 'shared/go.mod'  #todo: treba putanja do odgovarajuceg go.mod fajla
       - name: Check for diff
-        run: |                        # moracemo da proverimo kako smo generisali proto fajlove
+        run: |                        # moracemo da proverimo kako smo generisali proto fajlove - da bi popravili
           if ! git diff --exit-code pb/; then
             echo "::error::Generated proto code is out of date. Run 'make proto' and commit the result."
             exit 1
