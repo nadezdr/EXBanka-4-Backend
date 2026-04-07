@@ -27,6 +27,7 @@ jobs:
       - name: Build and Push Docker image
         uses: docker/build-push-action@d08e5c354a6adb9ed34480a06d141179aa583294
         with:
-          context: services/employee-service
+          context: .
+          file: services/employee-service/Dockerfile
           push: ${{ github.event_name == 'push' }}
           tags: ghcr.io/raf-si-2025/exbanka-4-backend/employee-service:${{ github.sha }}
