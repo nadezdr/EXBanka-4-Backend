@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:  #ovo u svakom jobu 
       run:
-        working-directory: services/employee-service #jos neka izmena
+        working-directory: services/employee-service #j jos jos neka izmena
     steps:
       - name: Checkout code
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
@@ -57,6 +57,7 @@ jobs:
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20
         with:
           version: v2.11
+          working-directory: services/employee-service
 
   gofmt:
     name: Go format

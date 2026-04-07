@@ -25,14 +25,14 @@ func TestPaginate(t *testing.T) {
 		wantLimit  int32
 		wantOffset int32
 	}{
-		{"normal page 1",            1,  10,  10,  0},
-		{"page 2",                   2,  10,  10,  10},
-		{"page 3 size 5",            3,  5,   5,   10},
-		{"page 0 defaults to 1",     0,  10,  10,  0},
-		{"pageSize 0 defaults to 20", 1, 0,   20,  0},
-		{"pageSize over max",        1,  200, 100, 0},
-		{"both zero",                0,  0,   20,  0},
-		{"large page",               5,  25,  25,  100},
+		{"normal page 1", 1, 10, 10, 0},
+		{"page 2", 2, 10, 10, 10},
+		{"page 3 size 5", 3, 5, 5, 10},
+		{"page 0 defaults to 1", 0, 10, 10, 0},
+		{"pageSize 0 defaults to 20", 1, 0, 20, 0},
+		{"pageSize over max", 1, 200, 100, 0},
+		{"both zero", 0, 0, 20, 0},
+		{"large page", 5, 25, 25, 100},
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
