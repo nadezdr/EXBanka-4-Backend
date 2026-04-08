@@ -16,7 +16,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
-	defer database.Close()
+	defer func() {
+		if err := database.Close(); err != nil {
+			log.Printf("database.Close: %v", err)
+		}
+	}()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
