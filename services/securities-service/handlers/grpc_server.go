@@ -380,9 +380,9 @@ const listingBaseFrom = `
 
 const listingBaseWhere = `
 	WHERE ($1 = '' OR l.type = $1::listing_type)
-	  AND ($2 = 0   OR l.exchange_id = $2)
-	  AND ($3 = ''  OR l.ticker ILIKE $3||'%')
-	  AND ($4 = ''  OR l.name   ILIKE '%'||$4||'%')`
+	  AND ($2 = '' OR se.acronym ILIKE $2||'%')
+	  AND ($3 = '' OR l.ticker ILIKE $3||'%')
+	  AND ($4 = '' OR l.name   ILIKE '%'||$4||'%')`
 
 func (s *SecuritiesServer) GetListings(ctx context.Context, req *pb.GetListingsRequest) (*pb.GetListingsResponse, error) {
 	page, pageSize := req.Page, req.PageSize
@@ -412,7 +412,7 @@ func (s *SecuritiesServer) GetListings(ctx context.Context, req *pb.GetListingsR
 	var total int64
 	if err := s.DB.QueryRowContext(ctx,
 		`SELECT COUNT(*) `+listingBaseFrom+listingBaseWhere,
-		req.Type, req.ExchangeId, req.TickerPrefix, req.NameSearch,
+		req.Type, req.ExchangeAcronymPrefix, req.TickerPrefix, req.NameSearch,
 	).Scan(&total); err != nil {
 		return nil, status.Errorf(codes.Internal, "count failed: %v", err)
 	}
@@ -430,7 +430,7 @@ func (s *SecuritiesServer) GetListings(ctx context.Context, req *pb.GetListingsR
 		LIMIT $5 OFFSET $6`, listingBaseFrom, listingBaseWhere, col, ord)
 
 	rows, err := s.DB.QueryContext(ctx, query,
-		req.Type, req.ExchangeId, req.TickerPrefix, req.NameSearch, pageSize, offset)
+		req.Type, req.ExchangeAcronymPrefix, req.TickerPrefix, req.NameSearch, pageSize, offset)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "query failed: %v", err)
 	}
