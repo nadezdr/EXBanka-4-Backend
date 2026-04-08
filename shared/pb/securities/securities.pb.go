@@ -1714,17 +1714,17 @@ func (x *SetTestModeResponse) GetEnabled() bool {
 }
 
 type GetListingsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`                                // STOCK, FOREX_PAIR, FUTURES_CONTRACT, OPTION — empty = all
-	ExchangeId    int64                  `protobuf:"varint,2,opt,name=exchange_id,json=exchangeId,proto3" json:"exchange_id,omitempty"` // 0 = all exchanges
-	TickerPrefix  string                 `protobuf:"bytes,3,opt,name=ticker_prefix,json=tickerPrefix,proto3" json:"ticker_prefix,omitempty"`
-	NameSearch    string                 `protobuf:"bytes,4,opt,name=name_search,json=nameSearch,proto3" json:"name_search,omitempty"`
-	Page          int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`                           // 1-based, default 1
-	PageSize      int32                  `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // default 10
-	SortBy        string                 `protobuf:"bytes,7,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`          // price, volume, change_percent, maintenance_margin
-	SortOrder     string                 `protobuf:"bytes,8,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"` // ASC, DESC
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Type                  string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`                                                                  // STOCK, FOREX_PAIR, FUTURES_CONTRACT, OPTION — empty = all
+	ExchangeAcronymPrefix string                 `protobuf:"bytes,2,opt,name=exchange_acronym_prefix,json=exchangeAcronymPrefix,proto3" json:"exchange_acronym_prefix,omitempty"` // acronym prefix filter — empty = all exchanges
+	TickerPrefix          string                 `protobuf:"bytes,3,opt,name=ticker_prefix,json=tickerPrefix,proto3" json:"ticker_prefix,omitempty"`
+	NameSearch            string                 `protobuf:"bytes,4,opt,name=name_search,json=nameSearch,proto3" json:"name_search,omitempty"`
+	Page                  int32                  `protobuf:"varint,5,opt,name=page,proto3" json:"page,omitempty"`                           // 1-based, default 1
+	PageSize              int32                  `protobuf:"varint,6,opt,name=page_size,json=pageSize,proto3" json:"page_size,omitempty"`   // default 10
+	SortBy                string                 `protobuf:"bytes,7,opt,name=sort_by,json=sortBy,proto3" json:"sort_by,omitempty"`          // price, volume, change_percent, maintenance_margin
+	SortOrder             string                 `protobuf:"bytes,8,opt,name=sort_order,json=sortOrder,proto3" json:"sort_order,omitempty"` // ASC, DESC
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *GetListingsRequest) Reset() {
@@ -1764,11 +1764,11 @@ func (x *GetListingsRequest) GetType() string {
 	return ""
 }
 
-func (x *GetListingsRequest) GetExchangeId() int64 {
+func (x *GetListingsRequest) GetExchangeAcronymPrefix() string {
 	if x != nil {
-		return x.ExchangeId
+		return x.ExchangeAcronymPrefix
 	}
-	return 0
+	return ""
 }
 
 func (x *GetListingsRequest) GetTickerPrefix() string {
@@ -2751,11 +2751,10 @@ const file_securities_proto_rawDesc = "" +
 	"\x12SetTestModeRequest\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\"/\n" +
 	"\x13SetTestModeResponse\x12\x18\n" +
-	"\aenabled\x18\x01 \x01(\bR\aenabled\"\xf8\x01\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\"\x8f\x02\n" +
 	"\x12GetListingsRequest\x12\x12\n" +
-	"\x04type\x18\x01 \x01(\tR\x04type\x12\x1f\n" +
-	"\vexchange_id\x18\x02 \x01(\x03R\n" +
-	"exchangeId\x12#\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x126\n" +
+	"\x17exchange_acronym_prefix\x18\x02 \x01(\tR\x15exchangeAcronymPrefix\x12#\n" +
 	"\rticker_prefix\x18\x03 \x01(\tR\ftickerPrefix\x12\x1f\n" +
 	"\vname_search\x18\x04 \x01(\tR\n" +
 	"nameSearch\x12\x12\n" +

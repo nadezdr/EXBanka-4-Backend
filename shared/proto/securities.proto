@@ -127,9 +127,9 @@ message SetTestModeResponse { bool enabled = 1; }
 // ── Listings ──────────────────────────────────────────────────────────────────
 
 message GetListingsRequest {
-  string type          = 1; // STOCK, FOREX_PAIR, FUTURES_CONTRACT, OPTION — empty = all
-  int64  exchange_id   = 2; // 0 = all exchanges
-  string ticker_prefix = 3;
+  string type                    = 1; // STOCK, FOREX_PAIR, FUTURES_CONTRACT, OPTION — empty = all
+  string exchange_acronym_prefix = 2; // acronym prefix filter — empty = all exchanges
+  string ticker_prefix           = 3;
   string name_search   = 4;
   int32  page          = 5; // 1-based, default 1
   int32  page_size     = 6; // default 10
