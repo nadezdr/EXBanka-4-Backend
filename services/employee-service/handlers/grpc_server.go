@@ -59,7 +59,7 @@ func (s *EmployeeServer) GetAllEmployees(ctx context.Context, req *pb.GetAllEmpl
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var employees []*pb.Employee
 	for rows.Next() {
@@ -106,7 +106,7 @@ func (s *EmployeeServer) SearchEmployees(ctx context.Context, req *pb.SearchEmpl
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var employees []*pb.Employee
 	for rows.Next() {
@@ -391,7 +391,7 @@ func (s *EmployeeServer) GetActuaries(ctx context.Context, req *pb.GetActuariesR
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var actuaries []*pb.ActuaryInfo
 	for rows.Next() {
