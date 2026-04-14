@@ -45,7 +45,7 @@ func main() {
 	})
 
 	// Seed data on startup (runs in background, does not block gRPC server).
-	go seeder.Seed(securitiesDB, os.Getenv("ALPACA_API_KEY"), os.Getenv("ALPHAVANTAGE_API_KEY"), exchangeCSV, futureDataCSV)
+	go seeder.Seed(securitiesDB, os.Getenv("ALPACA_API_KEY"), os.Getenv("ALPACA_API_SECRET_KEY"), os.Getenv("ALPHAVANTAGE_API_KEY"), exchangeCSV, futureDataCSV)
 
 	// Refresh prices every 15 minutes.
 	scheduler.StartPriceRefresh(securitiesDB, os.Getenv("ALPHAVANTAGE_API_KEY"), 15*time.Minute)

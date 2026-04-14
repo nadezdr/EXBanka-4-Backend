@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-const alpacaMaxTickers = 100
+const alpacaMaxTickers = 50
 
 // alpacaAsset is the subset of Alpaca's asset object we care about.
 type alpacaAsset struct {
@@ -19,7 +19,7 @@ type alpacaAsset struct {
 
 // FetchTickers fetches up to alpacaMaxTickers tradable US equity tickers from Alpaca Markets.
 // Endpoint: GET https://data.alpaca.markets/v2/assets?status=active&asset_class=us_equity
-func FetchTickers(apiKey string) ([]alpacaAsset, error) {
+func FetchTickers(apiKey, secretKey string) ([]alpacaAsset, error) {
 	req, err := http.NewRequest(http.MethodGet, "https://paper-api.alpaca.markets/v2/assets", nil)
 	if err != nil {
 		return nil, fmt.Errorf("alpaca: build request: %w", err)
@@ -29,7 +29,7 @@ func FetchTickers(apiKey string) ([]alpacaAsset, error) {
 	q.Set("asset_class", "us_equity")
 	req.URL.RawQuery = q.Encode()
 	req.Header.Set("APCA-API-KEY-ID", apiKey)
-	req.Header.Set("APCA-API-SECRET-KEY", "") // secret not needed for paper broker asset list
+	req.Header.Set("APCA-API-SECRET-KEY", secretKey)
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Do(req)
