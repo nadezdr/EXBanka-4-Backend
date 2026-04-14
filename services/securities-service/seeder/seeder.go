@@ -6,6 +6,36 @@ import (
 	"time"
 )
 
+// wellKnownStocks is a curated list of popular S&P 500 stocks.
+// OutstandingShares and DividendYield are hardcoded public data.
+var wellKnownStocks = []struct {
+	Symbol            string
+	Name              string
+	OutstandingShares int64
+	DividendYield     float64 // decimal, e.g. 0.03 = 3%
+}{
+	{"AAPL",  "Apple Inc.",                  15_408_756_000, 0.0051},
+	{"MSFT",  "Microsoft Corporation",        7_433_088_000, 0.0082},
+	{"GOOGL", "Alphabet Inc.",               12_155_016_000, 0.0},
+	{"AMZN",  "Amazon.com Inc.",             10_598_400_000, 0.0},
+	{"NVDA",  "NVIDIA Corporation",          24_387_000_000, 0.0003},
+	{"META",  "Meta Platforms Inc.",          2_531_000_000, 0.0035},
+	{"TSLA",  "Tesla Inc.",                   3_210_000_000, 0.0},
+	{"JPM",   "JPMorgan Chase & Co.",         2_849_000_000, 0.0230},
+	{"V",     "Visa Inc.",                    2_049_000_000, 0.0085},
+	{"JNJ",   "Johnson & Johnson",            2_401_000_000, 0.0320},
+	{"WMT",   "Walmart Inc.",                 8_048_000_000, 0.0099},
+	{"XOM",   "Exxon Mobil Corporation",      3_979_000_000, 0.0380},
+	{"MA",    "Mastercard Inc.",                929_000_000, 0.0066},
+	{"UNH",   "UnitedHealth Group Inc.",        924_000_000, 0.0165},
+	{"HD",    "The Home Depot Inc.",            993_000_000, 0.0240},
+	{"PG",    "Procter & Gamble Co.",         2_356_000_000, 0.0240},
+	{"BAC",   "Bank of America Corp.",        7_790_000_000, 0.0260},
+	{"KO",    "The Coca-Cola Company",        4_289_000_000, 0.0300},
+	{"NFLX",  "Netflix Inc.",                   429_000_000, 0.0},
+	{"DIS",   "The Walt Disney Company",      1_828_000_000, 0.0},
+}
+
 // forexPairs is the fixed list of pairs to seed. Liquidity is assigned statically.
 var forexPairs = []struct {
 	From      string
@@ -73,19 +103,9 @@ func Seed(db *sql.DB, alpacaKey, alpacaSecret, avKey string, exchangeCSV, future
 	}
 
 	// ── 2. Stocks ─────────────────────────────────────────────────────────────────
-	if alpacaKey != "" {
-		log.Println("seeder: fetching tickers from Alpaca")
-		assets, err := FetchTickers(alpacaKey, alpacaSecret)
-		if err != nil {
-			log.Printf("seeder: fetch tickers: %v", err)
-		} else {
-			log.Printf("seeder: seeding %d stocks", len(assets))
-			for _, asset := range assets {
-				seedStock(db, asset.Symbol, asset.Name, defaultExchangeID, alpacaKey, alpacaSecret, avKey)
-			}
-		}
-	} else {
-		log.Println("seeder: ALPACA_API_KEY not set, skipping stock import")
+	log.Printf("seeder: seeding %d stocks", len(wellKnownStocks))
+	for _, s := range wellKnownStocks {
+		seedStock(db, s.Symbol, s.Name, s.OutstandingShares, s.DividendYield, defaultExchangeID, alpacaKey, alpacaSecret, avKey)
 	}
 
 	// ── 3. Forex pairs ────────────────────────────────────────────────────────────
@@ -138,8 +158,7 @@ func Seed(db *sql.DB, alpacaKey, alpacaSecret, avKey string, exchangeCSV, future
 }
 
 // seedStock fetches metadata + history and inserts one stock.
-// Prices and history are fetched from Alpaca (no rate limit).
-func seedStock(db *sql.DB, ticker, fallbackName string, exchangeID int64, alpacaKey, alpacaSecret, avKey string) {
+func seedStock(db *sql.DB, ticker, fallbackName string, outstandingShares int64, dividendYield float64, exchangeID int64, alpacaKey, alpacaSecret, avKey string) {
 	name := fallbackName
 	if name == "" {
 		name = ticker
@@ -164,16 +183,16 @@ func seedStock(db *sql.DB, ticker, fallbackName string, exchangeID int64, alpaca
 
 	if _, err := db.Exec(`
 		INSERT INTO listing_stock (listing_id, outstanding_shares, dividend_yield)
-		VALUES ($1, 0, 0)
+		VALUES ($1, $2, $3)
 		ON CONFLICT (listing_id) DO NOTHING`,
-		listingID); err != nil {
+		listingID, outstandingShares, dividendYield); err != nil {
 		log.Printf("seeder: insert listing_stock %s: %v", ticker, err)
 	}
 
-	// Historical prices from Alpaca (no rate limit).
-	bars, err := FetchStockBars(ticker, alpacaKey, alpacaSecret)
+	// Historical prices from Yahoo Finance (free, no key, 30-day daily bars).
+	bars, err := FetchStockBarsYahoo(ticker)
 	if err != nil {
-		log.Printf("seeder: stock bars %s: %v", ticker, err)
+		log.Printf("seeder: yahoo bars %s: %v", ticker, err)
 	} else {
 		insertDailyBars(db, listingID, bars)
 	}

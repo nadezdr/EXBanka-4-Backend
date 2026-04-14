@@ -76,7 +76,8 @@ func FetchStockSnapshot(symbol, apiKey, secretKey string) (*Quote, error) {
 
 // FetchStockBars returns up to 30 daily bars for a stock ticker.
 func FetchStockBars(symbol, apiKey, secretKey string) ([]DailyBar, error) {
-	url := fmt.Sprintf("%s/bars?symbols=%s&timeframe=1Day&limit=30&sort=asc&feed=iex", alpacaDataBase, symbol)
+	start := time.Now().AddDate(0, 0, -30).Format("2006-01-02")
+	url := fmt.Sprintf("%s/bars?symbols=%s&timeframe=1Day&limit=30&sort=asc&feed=sip&start=%s", alpacaDataBase, symbol, start)
 
 	var raw struct {
 		Bars map[string][]struct {
