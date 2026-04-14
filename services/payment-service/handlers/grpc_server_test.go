@@ -25,7 +25,7 @@ func newPaymentServer(t *testing.T) (*PaymentServer, sqlmock.Sqlmock, sqlmock.Sq
 	accountDB, accountMock, err := sqlmock.New()
 	require.NoError(t, err)
 	s := &PaymentServer{DB: db, AccountDB: accountDB}
-	t.Cleanup(func() { db.Close(); accountDB.Close() })
+	t.Cleanup(func() { _ = db.Close(); _ = accountDB.Close() })
 	return s, dbMock, accountMock
 }
 
@@ -40,7 +40,7 @@ func newTransferServer(t *testing.T) (*PaymentServer, sqlmock.Sqlmock, sqlmock.S
 	exchangeDB, exchangeMock, err := sqlmock.New()
 	require.NoError(t, err)
 	s := &PaymentServer{DB: db, AccountDB: accountDB, ExchangeDB: exchangeDB}
-	t.Cleanup(func() { db.Close(); accountDB.Close(); exchangeDB.Close() })
+	t.Cleanup(func() { _ = db.Close(); _ = accountDB.Close(); _ = exchangeDB.Close() })
 	return s, dbMock, accountMock, exchangeMock
 }
 
@@ -55,7 +55,7 @@ func newPaymentServerWithExchange(t *testing.T) (*PaymentServer, sqlmock.Sqlmock
 	exchangeDB, exchangeMock, err := sqlmock.New()
 	require.NoError(t, err)
 	s := &PaymentServer{DB: db, AccountDB: accountDB, ExchangeDB: exchangeDB}
-	t.Cleanup(func() { db.Close(); accountDB.Close(); exchangeDB.Close() })
+	t.Cleanup(func() { _ = db.Close(); _ = accountDB.Close(); _ = exchangeDB.Close() })
 	return s, dbMock, accountMock, exchangeMock
 }
 
@@ -67,8 +67,8 @@ func newMockServer(t *testing.T) (*PaymentServer, sqlmock.Sqlmock, sqlmock.Sqlmo
 	accountDB, accountMock, err := sqlmock.New()
 	require.NoError(t, err)
 	t.Cleanup(func() {
-		paymentDB.Close()
-		accountDB.Close()
+		_ = paymentDB.Close()
+		_ = accountDB.Close()
 	})
 	return &PaymentServer{DB: paymentDB, AccountDB: accountDB}, paymentMock, accountMock
 }
@@ -84,7 +84,7 @@ func newMockServerFull(t *testing.T) (*PaymentServer, sqlmock.Sqlmock, sqlmock.S
 	require.NoError(t, err)
 	clientDB, clientMock, err := sqlmock.New()
 	require.NoError(t, err)
-	t.Cleanup(func() { paymentDB.Close(); accountDB.Close(); exchangeDB.Close(); clientDB.Close() })
+	t.Cleanup(func() { _ = paymentDB.Close(); _ = accountDB.Close(); _ = exchangeDB.Close(); _ = clientDB.Close() })
 	return &PaymentServer{DB: paymentDB, AccountDB: accountDB, ExchangeDB: exchangeDB, ClientDB: clientDB},
 		paymentMock, accountMock, exchangeMock, clientMock
 }
@@ -99,7 +99,7 @@ func newMockServerWithClientDB(t *testing.T) (*PaymentServer, sqlmock.Sqlmock, s
 	require.NoError(t, err)
 	clientDB, clientMock, err := sqlmock.New()
 	require.NoError(t, err)
-	t.Cleanup(func() { paymentDB.Close(); accountDB.Close(); clientDB.Close() })
+	t.Cleanup(func() { _ = paymentDB.Close(); _ = accountDB.Close(); _ = clientDB.Close() })
 	return &PaymentServer{DB: paymentDB, AccountDB: accountDB, ClientDB: clientDB}, paymentMock, accountMock, clientMock
 }
 
