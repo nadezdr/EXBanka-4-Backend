@@ -74,7 +74,7 @@ func newLoanServer(t *testing.T) (*LoanServer, sqlmock.Sqlmock, sqlmock.Sqlmock)
 	require.NoError(t, err)
 	accountDB, accountMock, err := sqlmock.New()
 	require.NoError(t, err)
-	t.Cleanup(func() { db.Close(); accountDB.Close() })
+	t.Cleanup(func() { _ = db.Close(); _ = accountDB.Close() })
 	return &LoanServer{DB: db, AccountDB: accountDB}, loanMock, accountMock
 }
 
@@ -87,7 +87,7 @@ func newLoanServerWithExchange(t *testing.T) (*LoanServer, sqlmock.Sqlmock, sqlm
 	require.NoError(t, err)
 	exchangeDB, exchangeMock, err := sqlmock.New()
 	require.NoError(t, err)
-	t.Cleanup(func() { db.Close(); accountDB.Close(); exchangeDB.Close() })
+	t.Cleanup(func() { _ = db.Close(); _ = accountDB.Close(); _ = exchangeDB.Close() })
 	return &LoanServer{DB: db, AccountDB: accountDB, ExchangeDB: exchangeDB}, loanMock, accountMock, exchangeMock
 }
 

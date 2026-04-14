@@ -36,7 +36,7 @@ func (s *LoanServer) GetClientLoans(ctx context.Context, req *pb.GetClientLoansR
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to query loans: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var loans []*pb.LoanSummary
 	for rows.Next() {
@@ -322,7 +322,7 @@ func (s *LoanServer) ApproveLoan(ctx context.Context, req *pb.ApproveLoanRequest
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to begin transaction: %v", err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	for i := 1; i <= repaymentPeriod; i++ {
 		dueDate := agreedDate.AddDate(0, i, 0)
