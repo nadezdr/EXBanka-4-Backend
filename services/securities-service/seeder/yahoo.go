@@ -6,8 +6,147 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"sort"
 	"time"
 )
+
+var yahooHTTPClient = &http.Client{Timeout: 15 * time.Second}
+
+// FetchStockBarsYahoo fetches 30 days of daily OHLCV data from Yahoo Finance (free, no key).
+func FetchStockBarsYahoo(ticker string) ([]DailyBar, error) {
+	url := fmt.Sprintf(
+		"https://query1.finance.yahoo.com/v8/finance/chart/%s?interval=1d&range=1mo",
+		ticker,
+	)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("yahoo chart: build request: %w", err)
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+
+	resp, err := yahooHTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("yahoo chart: request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("yahoo chart: status %d for %s", resp.StatusCode, ticker)
+	}
+
+	var raw struct {
+		Chart struct {
+			Result []struct {
+				Timestamps []int64 `json:"timestamp"`
+				Indicators struct {
+					Quote []struct {
+						Close  []float64 `json:"close"`
+						High   []float64 `json:"high"`
+						Low    []float64 `json:"low"`
+						Volume []int64   `json:"volume"`
+					} `json:"quote"`
+				} `json:"indicators"`
+			} `json:"result"`
+		} `json:"chart"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+		return nil, fmt.Errorf("yahoo chart: decode: %w", err)
+	}
+	if len(raw.Chart.Result) == 0 || len(raw.Chart.Result[0].Indicators.Quote) == 0 {
+		return nil, fmt.Errorf("yahoo chart: no data for %s", ticker)
+	}
+
+	result := raw.Chart.Result[0]
+	quotes := result.Indicators.Quote[0]
+	bars := make([]DailyBar, 0, len(result.Timestamps))
+	for i, ts := range result.Timestamps {
+		if i >= len(quotes.Close) || quotes.Close[i] == 0 {
+			continue
+		}
+		ask := 0.0
+		if i < len(quotes.High) {
+			ask = quotes.High[i]
+		}
+		bid := 0.0
+		if i < len(quotes.Low) {
+			bid = quotes.Low[i]
+		}
+		vol := int64(0)
+		if i < len(quotes.Volume) {
+			vol = quotes.Volume[i]
+		}
+		bars = append(bars, DailyBar{
+			Date:   time.Unix(ts, 0).UTC().Truncate(24 * time.Hour),
+			Price:  quotes.Close[i],
+			Ask:    ask,
+			Bid:    bid,
+			Volume: vol,
+		})
+	}
+	sort.Slice(bars, func(i, j int) bool { return bars[i].Date.Before(bars[j].Date) })
+	for i := 1; i < len(bars); i++ {
+		bars[i].Change = bars[i].Price - bars[i-1].Price
+	}
+	return bars, nil
+}
+
+// StockFundamentals holds basic fundamental data for a stock.
+type StockFundamentals struct {
+	OutstandingShares int64
+	DividendYield     float64
+}
+
+// FetchStockFundamentals fetches outstanding shares and dividend yield from Yahoo Finance.
+func FetchStockFundamentals(ticker string) (*StockFundamentals, error) {
+	url := fmt.Sprintf(
+		"https://query1.finance.yahoo.com/v10/finance/quoteSummary/%s?modules=defaultKeyStatistics,summaryDetail",
+		ticker,
+	)
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("yahoo fundamentals: build request: %w", err)
+	}
+	req.Header.Set("User-Agent", "Mozilla/5.0")
+
+	resp, err := yahooHTTPClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("yahoo fundamentals: request: %w", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("yahoo fundamentals: status %d for %s", resp.StatusCode, ticker)
+	}
+
+	var raw struct {
+		QuoteSummary struct {
+			Result []struct {
+				DefaultKeyStatistics struct {
+					SharesOutstanding struct {
+						Raw int64 `json:"raw"`
+					} `json:"sharesOutstanding"`
+				} `json:"defaultKeyStatistics"`
+				SummaryDetail struct {
+					DividendYield struct {
+						Raw float64 `json:"raw"`
+					} `json:"dividendYield"`
+				} `json:"summaryDetail"`
+			} `json:"result"`
+		} `json:"quoteSummary"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&raw); err != nil {
+		return nil, fmt.Errorf("yahoo fundamentals: decode: %w", err)
+	}
+	if len(raw.QuoteSummary.Result) == 0 {
+		return nil, fmt.Errorf("yahoo fundamentals: no data for %s", ticker)
+	}
+
+	r := raw.QuoteSummary.Result[0]
+	return &StockFundamentals{
+		OutstandingShares: r.DefaultKeyStatistics.SharesOutstanding.Raw,
+		DividendYield:     r.SummaryDetail.DividendYield.Raw,
+	}, nil
+}
 
 // OptionRow is one option contract to be inserted.
 type OptionRow struct {

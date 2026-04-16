@@ -6,6 +6,36 @@ import (
 	"time"
 )
 
+// wellKnownStocks is a curated list of popular S&P 500 stocks.
+// OutstandingShares and DividendYield are hardcoded public data.
+var wellKnownStocks = []struct {
+	Symbol            string
+	Name              string
+	OutstandingShares int64
+	DividendYield     float64 // decimal, e.g. 0.03 = 3%
+}{
+	{"AAPL",  "Apple Inc.",                  15_408_756_000, 0.0051},
+	{"MSFT",  "Microsoft Corporation",        7_433_088_000, 0.0082},
+	{"GOOGL", "Alphabet Inc.",               12_155_016_000, 0.0},
+	{"AMZN",  "Amazon.com Inc.",             10_598_400_000, 0.0},
+	{"NVDA",  "NVIDIA Corporation",          24_387_000_000, 0.0003},
+	{"META",  "Meta Platforms Inc.",          2_531_000_000, 0.0035},
+	{"TSLA",  "Tesla Inc.",                   3_210_000_000, 0.0},
+	{"JPM",   "JPMorgan Chase & Co.",         2_849_000_000, 0.0230},
+	{"V",     "Visa Inc.",                    2_049_000_000, 0.0085},
+	{"JNJ",   "Johnson & Johnson",            2_401_000_000, 0.0320},
+	{"WMT",   "Walmart Inc.",                 8_048_000_000, 0.0099},
+	{"XOM",   "Exxon Mobil Corporation",      3_979_000_000, 0.0380},
+	{"MA",    "Mastercard Inc.",                929_000_000, 0.0066},
+	{"UNH",   "UnitedHealth Group Inc.",        924_000_000, 0.0165},
+	{"HD",    "The Home Depot Inc.",            993_000_000, 0.0240},
+	{"PG",    "Procter & Gamble Co.",         2_356_000_000, 0.0240},
+	{"BAC",   "Bank of America Corp.",        7_790_000_000, 0.0260},
+	{"KO",    "The Coca-Cola Company",        4_289_000_000, 0.0300},
+	{"NFLX",  "Netflix Inc.",                   429_000_000, 0.0},
+	{"DIS",   "The Walt Disney Company",      1_828_000_000, 0.0},
+}
+
 // forexPairs is the fixed list of pairs to seed. Liquidity is assigned statically.
 var forexPairs = []struct {
 	From      string
@@ -28,7 +58,7 @@ var forexPairs = []struct {
 // exchangeCSVData and futureCSVData are the raw bytes of exchange_1.csv and future_data.csv.
 // It is idempotent: if listings are already present it returns immediately.
 // Intended to be called in a goroutine so it does not block the gRPC server.
-func Seed(db *sql.DB, alpacaKey, avKey string, exchangeCSV, futureDataCSV []byte) {
+func Seed(db *sql.DB, alpacaKey, alpacaSecret, avKey string, exchangeCSV, futureDataCSV []byte) {
 	log.Println("seeder: checking if seed is needed")
 
 	var count int
@@ -73,19 +103,9 @@ func Seed(db *sql.DB, alpacaKey, avKey string, exchangeCSV, futureDataCSV []byte
 	}
 
 	// ── 2. Stocks ─────────────────────────────────────────────────────────────────
-	if alpacaKey != "" {
-		log.Println("seeder: fetching tickers from Alpaca")
-		assets, err := FetchTickers(alpacaKey)
-		if err != nil {
-			log.Printf("seeder: fetch tickers: %v", err)
-		} else {
-			log.Printf("seeder: seeding %d stocks", len(assets))
-			for _, asset := range assets {
-				seedStock(db, asset.Symbol, asset.Name, defaultExchangeID, avKey)
-			}
-		}
-	} else {
-		log.Println("seeder: ALPACA_API_KEY not set, skipping stock import")
+	log.Printf("seeder: seeding %d stocks", len(wellKnownStocks))
+	for _, s := range wellKnownStocks {
+		seedStock(db, s.Symbol, s.Name, s.OutstandingShares, s.DividendYield, defaultExchangeID, alpacaKey, alpacaSecret, avKey)
 	}
 
 	// ── 3. Forex pairs ────────────────────────────────────────────────────────────
@@ -95,13 +115,9 @@ func Seed(db *sql.DB, alpacaKey, avKey string, exchangeCSV, futureDataCSV []byte
 		forexExchangeID = defaultExchangeID
 	}
 
-	if avKey != "" {
-		log.Printf("seeder: seeding %d forex pairs", len(forexPairs))
-		for _, fp := range forexPairs {
-			seedForex(db, fp.From, fp.To, fp.Liquidity, forexExchangeID, avKey)
-		}
-	} else {
-		log.Println("seeder: ALPHAVANTAGE_API_KEY not set, skipping forex import")
+	log.Printf("seeder: seeding %d forex pairs", len(forexPairs))
+	for _, fp := range forexPairs {
+		seedForex(db, fp.From, fp.To, fp.Liquidity, forexExchangeID)
 	}
 
 	// ── 4. Futures ────────────────────────────────────────────────────────────────
@@ -141,49 +157,21 @@ func Seed(db *sql.DB, alpacaKey, avKey string, exchangeCSV, futureDataCSV []byte
 	log.Println("seeder: data import complete")
 }
 
-// seedStock fetches metadata + history from AlphaVantage and inserts one stock.
-func seedStock(db *sql.DB, ticker, fallbackName string, exchangeID int64, avKey string) {
-	if avKey == "" {
-		return
-	}
-
-	ov, err := FetchCompanyOverview(ticker, avKey)
-	if err != nil {
-		log.Printf("seeder: overview %s: %v", ticker, err)
-		return
-	}
+// seedStock fetches metadata + history and inserts one stock.
+func seedStock(db *sql.DB, ticker, fallbackName string, outstandingShares int64, dividendYield float64, exchangeID int64, alpacaKey, alpacaSecret, avKey string) {
 	name := fallbackName
-	if ov != nil && ov.Name != "" {
-		name = ov.Name
-	}
 	if name == "" {
 		name = ticker
 	}
-
-	// Resolve exchange by acronym if possible.
 	exID := exchangeID
-	if ov != nil && ov.Exchange != "" {
-		var id int64
-		if err := db.QueryRow(`SELECT id FROM stock_exchanges WHERE acronym = $1 LIMIT 1`, ov.Exchange).Scan(&id); err == nil {
-			exID = id
-		}
-	}
-
-	var outstandingShares int64
-	var dividendYield float64
-	if ov != nil {
-		outstandingShares = ov.OutstandingShares
-		dividendYield = ov.DividendYield
-	}
 
 	var listingID int64
-	err = db.QueryRow(`
+	err := db.QueryRow(`
 		INSERT INTO listing (ticker, name, exchange_id, type, price, ask, bid, volume, change)
 		VALUES ($1, $2, $3, 'STOCK', 0, 0, 0, 0, 0)
 		ON CONFLICT (ticker) DO NOTHING
 		RETURNING id`, ticker, name, exID).Scan(&listingID)
 	if err == sql.ErrNoRows {
-		// Already exists (ON CONFLICT hit); look up the ID.
 		if err2 := db.QueryRow(`SELECT id FROM listing WHERE ticker = $1`, ticker).Scan(&listingID); err2 != nil {
 			log.Printf("seeder: lookup existing listing %s: %v", ticker, err2)
 			return
@@ -201,18 +189,18 @@ func seedStock(db *sql.DB, ticker, fallbackName string, exchangeID int64, avKey 
 		log.Printf("seeder: insert listing_stock %s: %v", ticker, err)
 	}
 
-	// Historical prices.
-	bars, err := FetchDailySeries(ticker, avKey)
+	// Historical prices from Yahoo Finance (free, no key, 30-day daily bars).
+	bars, err := FetchStockBarsYahoo(ticker)
 	if err != nil {
-		log.Printf("seeder: daily series %s: %v", ticker, err)
+		log.Printf("seeder: yahoo bars %s: %v", ticker, err)
 	} else {
 		insertDailyBars(db, listingID, bars)
 	}
 
-	// Current price snapshot.
-	q, err := FetchGlobalQuote(ticker, avKey)
+	// Current price snapshot from Alpaca.
+	q, err := FetchStockSnapshot(ticker, alpacaKey, alpacaSecret)
 	if err != nil {
-		log.Printf("seeder: global quote %s: %v", ticker, err)
+		log.Printf("seeder: stock snapshot %s: %v", ticker, err)
 	} else if q != nil {
 		_, err = db.Exec(`
 			UPDATE listing SET price=$2, ask=$3, bid=$4, change=$5, volume=$6, last_refresh=$7
@@ -225,7 +213,8 @@ func seedStock(db *sql.DB, ticker, fallbackName string, exchangeID int64, avKey 
 }
 
 // seedForex inserts a forex pair listing with history and current rate.
-func seedForex(db *sql.DB, from, to, liquidity string, exchangeID int64, avKey string) {
+// Uses exchangerate-api.com for current rates and Frankfurter for history (both free, no key needed).
+func seedForex(db *sql.DB, from, to, liquidity string, exchangeID int64) {
 	ticker := from + to
 	name := from + "/" + to
 
@@ -253,14 +242,16 @@ func seedForex(db *sql.DB, from, to, liquidity string, exchangeID int64, avKey s
 		log.Printf("seeder: insert forex pair %s: %v", ticker, err)
 	}
 
-	bars, err := FetchFXDaily(from, to, avKey)
+	// Historical prices from Frankfurter (ECB rates, free, no key).
+	bars, err := FetchFXDailyFree(from, to)
 	if err != nil {
 		log.Printf("seeder: FX daily %s: %v", ticker, err)
 	} else {
 		insertDailyBars(db, listingID, bars)
 	}
 
-	rate, err := FetchFXRate(from, to, avKey)
+	// Current rate from exchangerate-api.com (free, no key).
+	rate, err := FetchFXRateFree(from, to)
 	if err != nil {
 		log.Printf("seeder: FX rate %s: %v", ticker, err)
 	} else if rate != nil {
@@ -278,12 +269,22 @@ func seedForex(db *sql.DB, from, to, liquidity string, exchangeID int64, avKey s
 func seedFuture(db *sql.DB, f FutureRow, exchangeID int64, settlement time.Time) {
 	ticker := sanitizeTicker(f.ContractName)
 
+	// Derive initial price from the CSV maintenance margin.
+	// The handler computes: maintenanceMargin = contractSize * price * 0.10
+	// So: price = maintenanceMargin / (contractSize * 0.10)
+	price := 0.0
+	if f.ContractSize > 0 && f.MaintenanceMargin > 0 {
+		price = f.MaintenanceMargin / (f.ContractSize * 0.10)
+	}
+	ask := price * 1.001
+	bid := price * 0.999
+
 	var listingID int64
 	err := db.QueryRow(`
 		INSERT INTO listing (ticker, name, exchange_id, type, price, ask, bid, volume, change)
-		VALUES ($1, $2, $3, 'FUTURES_CONTRACT', 0, 0, 0, 0, 0)
+		VALUES ($1, $2, $3, 'FUTURES_CONTRACT', $4, $5, $6, 1000, 0)
 		ON CONFLICT (ticker) DO NOTHING
-		RETURNING id`, ticker, f.ContractName, exchangeID).Scan(&listingID)
+		RETURNING id`, ticker, f.ContractName, exchangeID, price, ask, bid).Scan(&listingID)
 	if err == sql.ErrNoRows {
 		if err2 := db.QueryRow(`SELECT id FROM listing WHERE ticker = $1`, ticker).Scan(&listingID); err2 != nil {
 			log.Printf("seeder: lookup future %s: %v", ticker, err2)
