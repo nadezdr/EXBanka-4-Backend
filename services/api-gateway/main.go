@@ -204,8 +204,8 @@ func main() {
 	r.PUT("/orders/:id/decline", middleware.RequireRole("SUPERVISOR"), handlers.DeclineOrder(orderClient))
 	r.DELETE("/orders/:id/portions", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.CancelOrderPortions(orderClient))
 	r.DELETE("/orders/:id", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.CancelOrder(orderClient))
-	r.GET("/portfolio", handlers.GetPortfolio(portfolioClient))
-	r.GET("/portfolio/profit", handlers.GetProfit(portfolioClient))
+	r.GET("/portfolio", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.GetPortfolio(portfolioClient))
+	r.GET("/portfolio/profit", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.GetProfit(portfolioClient))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if err := r.Run(":8083"); err != nil {
 		log.Fatalf("server error: %v", err)
