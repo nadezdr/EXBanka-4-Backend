@@ -506,6 +506,7 @@ func GetBankAccounts(accountClient pb.AccountServiceClient) gin.HandlerFunc {
 		result := make([]gin.H, len(resp.Accounts))
 		for i, a := range resp.Accounts {
 			result[i] = gin.H{
+				"id":               a.Id,
 				"accountNumber":    a.AccountNumber,
 				"accountName":      a.AccountName,
 				"currencyCode":     a.CurrencyCode,
