@@ -399,7 +399,7 @@ func (s *AccountServer) UpdateAccountLimits(ctx context.Context, req *pb.UpdateA
 
 func (s *AccountServer) GetBankAccounts(ctx context.Context, _ *pb.GetBankAccountsRequest) (*pb.GetBankAccountsResponse, error) {
 	rows, err := s.DB.QueryContext(ctx, `
-		SELECT account_number, account_name, balance, available_balance, currency_id
+		SELECT id, account_number, account_name, balance, available_balance, currency_id
 		FROM accounts
 		WHERE owner_id = 0 AND account_type = 'BANK'
 		ORDER BY currency_id`)
@@ -412,7 +412,7 @@ func (s *AccountServer) GetBankAccounts(ctx context.Context, _ *pb.GetBankAccoun
 	for rows.Next() {
 		var a pb.BankAccountItem
 		var currencyID int64
-		if err := rows.Scan(&a.AccountNumber, &a.AccountName, &a.Balance, &a.AvailableBalance, &currencyID); err != nil {
+		if err := rows.Scan(&a.Id, &a.AccountNumber, &a.AccountName, &a.Balance, &a.AvailableBalance, &currencyID); err != nil {
 			return nil, status.Errorf(codes.Internal, "failed to scan bank account: %v", err)
 		}
 		_ = s.ExchangeDB.QueryRowContext(ctx, `SELECT code FROM currencies WHERE id = $1`, currencyID).Scan(&a.CurrencyCode)
