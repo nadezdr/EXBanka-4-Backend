@@ -67,6 +67,11 @@ CREATE TABLE IF NOT EXISTS actuary_info (
     used_limit    NUMERIC NOT NULL DEFAULT 0,
     need_approval BOOLEAN NOT NULL DEFAULT false
 );
+
+-- Seed actuary_info for all employees that already have AGENT or SUPERVISOR permissions.
+-- Without this, GetActuaries INNER JOIN returns empty even though employees exist.
 INSERT INTO actuary_info (employee_id, limit_amount, used_limit, need_approval)
-SELECT id, 100000, 0, false FROM employees WHERE username = 'denis'
-ON CONFLICT DO NOTHING;
+SELECT id, 100000, 0, false
+FROM employees
+WHERE 'AGENT' = ANY(permissions) OR 'SUPERVISOR' = ANY(permissions)
+ON CONFLICT (employee_id) DO NOTHING;
