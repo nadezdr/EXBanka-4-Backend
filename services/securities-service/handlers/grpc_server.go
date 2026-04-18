@@ -323,18 +323,23 @@ func (s *SecuritiesServer) IsExchangeOpen(ctx context.Context, req *pb.IsExchang
 
 	// 5. Load working hours for this polity
 	rows, err := s.DB.QueryContext(ctx,
-		`SELECT segment, open_time, close_time FROM exchange_working_hours WHERE polity = $1`,
+		`SELECT segment, TO_CHAR(open_time, 'HH24:MI'), TO_CHAR(close_time, 'HH24:MI') FROM exchange_working_hours WHERE polity = $1`,
 		polity)
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "query failed: %v", err)
 	}
 	defer func() { _ = rows.Close() }()
 
-	// 6. Check which segment (if any) the current time falls in
+	// 6. Check which segment (if any) the current time falls in; also track the
+	//    regular session hours for pre/post-market calculation below.
+	var regularOpen, regularClose string
 	for rows.Next() {
 		var segment, openStr, closeStr string
 		if err := rows.Scan(&segment, &openStr, &closeStr); err != nil {
 			return nil, status.Errorf(codes.Internal, "scan failed: %v", err)
+		}
+		if segment == "regular" {
+			regularOpen, regularClose = openStr, closeStr
 		}
 		if timeInRange(currentTime, openStr, closeStr) {
 			return &pb.IsExchangeOpenResponse{
@@ -346,13 +351,57 @@ func (s *SecuritiesServer) IsExchangeOpen(ctx context.Context, req *pb.IsExchang
 		}
 	}
 
-	// 7. No segment matched — exchange is closed
+	// 7. No explicit segment matched — check pre/post-market windows (±4 h of regular session).
+	if regularOpen != "" && regularClose != "" {
+		const window = 4 * time.Hour
+		if seg := prePostMarketSegment(currentTime, regularOpen, regularClose, window); seg != "" {
+			return &pb.IsExchangeOpenResponse{
+				MicCode:          req.MicCode,
+				IsOpen:           false,
+				Segment:          seg,
+				CurrentTimeLocal: currentTime,
+			}, nil
+		}
+	}
+
 	return &pb.IsExchangeOpenResponse{
 		MicCode:          req.MicCode,
 		IsOpen:           false,
 		Segment:          "closed",
 		CurrentTimeLocal: currentTime,
 	}, nil
+}
+
+// prePostMarketSegment returns "pre_market" if t falls within [regularOpen-window, regularOpen),
+// "post_market" if within [regularClose, regularClose+window), or "" otherwise.
+// All time strings are "HH:MM".
+func prePostMarketSegment(t, regularOpen, regularClose string, window time.Duration) string {
+	parse := func(s string) (time.Duration, error) {
+		var h, m int
+		if _, err := fmt.Sscanf(s, "%d:%d", &h, &m); err != nil {
+			return 0, err
+		}
+		return time.Duration(h)*time.Hour + time.Duration(m)*time.Minute, nil
+	}
+	tDur, err := parse(t)
+	if err != nil {
+		return ""
+	}
+	openDur, err := parse(regularOpen)
+	if err != nil {
+		return ""
+	}
+	closeDur, err := parse(regularClose)
+	if err != nil {
+		return ""
+	}
+	if tDur >= openDur-window && tDur < openDur {
+		return "pre_market"
+	}
+	if tDur >= closeDur && tDur < closeDur+window {
+		return "post_market"
+	}
+	return ""
 }
 
 // timeInRange returns true if t is within [open, close) (all "HH:MM" strings).
