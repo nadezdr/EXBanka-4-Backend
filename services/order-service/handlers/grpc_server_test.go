@@ -566,3 +566,194 @@ func TestCreateOrder_Happy_Employee_Supervisor_Approved(t *testing.T) {
 	assert.Equal(t, int64(9), resp.OrderId)
 	assert.Equal(t, "APPROVED", resp.Status) // supervisor → always APPROVED
 }
+
+// determineOrderType coverage: LIMIT, STOP, STOP_LIMIT variants
+
+func TestCreateOrder_LimitOrder(t *testing.T) {
+	srv, dbMock, _, secMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").WillReturnError(sql.ErrNoRows)
+	dbMock.ExpectQuery("INSERT INTO orders").WillReturnRows(
+		sqlmock.NewRows([]string{"id"}).AddRow(int64(10)),
+	)
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42,
+		Direction: "BUY", LimitValue: 200.0,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "LIMIT", resp.OrderType)
+}
+
+func TestCreateOrder_StopOrder(t *testing.T) {
+	srv, dbMock, _, secMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").WillReturnError(sql.ErrNoRows)
+	dbMock.ExpectQuery("INSERT INTO orders").WillReturnRows(
+		sqlmock.NewRows([]string{"id"}).AddRow(int64(11)),
+	)
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42,
+		Direction: "BUY", StopValue: 140.0,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "STOP", resp.OrderType)
+}
+
+func TestCreateOrder_StopLimitOrder(t *testing.T) {
+	srv, dbMock, _, secMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").WillReturnError(sql.ErrNoRows)
+	dbMock.ExpectQuery("INSERT INTO orders").WillReturnRows(
+		sqlmock.NewRows([]string{"id"}).AddRow(int64(12)),
+	)
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42,
+		Direction: "SELL", LimitValue: 145.0, StopValue: 140.0,
+	})
+	require.NoError(t, err)
+	assert.Equal(t, "STOP_LIMIT", resp.OrderType)
+}
+
+// checkAfterHours coverage: MIC found but working hours call fails / no regular segment / exchange error
+
+func TestCreateOrder_AfterHours_WorkingHoursError(t *testing.T) {
+	srv, dbMock, _, secMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		getWorkingHours: func(ctx context.Context, in *pb_sec.GetWorkingHoursRequest, opts ...grpc.CallOption) (*pb_sec.GetWorkingHoursResponse, error) {
+			return nil, fmt.Errorf("working hours unavailable")
+		},
+	}
+	// MIC lookup succeeds
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").WillReturnRows(
+		sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"),
+	)
+	dbMock.ExpectQuery("INSERT INTO orders").WillReturnRows(
+		sqlmock.NewRows([]string{"id"}).AddRow(int64(13)),
+	)
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, int64(13), resp.OrderId)
+}
+
+func TestCreateOrder_AfterHours_NoRegularSegment(t *testing.T) {
+	srv, dbMock, _, secMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		getWorkingHours: func(ctx context.Context, in *pb_sec.GetWorkingHoursRequest, opts ...grpc.CallOption) (*pb_sec.GetWorkingHoursResponse, error) {
+			return &pb_sec.GetWorkingHoursResponse{
+				Hours: []*pb_sec.ExchangeWorkingHours{
+					{Segment: "extended", OpenTime: "04:00", CloseTime: "20:00"},
+				},
+			}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").WillReturnRows(
+		sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"),
+	)
+	dbMock.ExpectQuery("INSERT INTO orders").WillReturnRows(
+		sqlmock.NewRows([]string{"id"}).AddRow(int64(14)),
+	)
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, int64(14), resp.OrderId)
+}
+
+func TestCreateOrder_AfterHours_ExchangeByMICError(t *testing.T) {
+	srv, dbMock, _, secMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		getWorkingHours: func(ctx context.Context, in *pb_sec.GetWorkingHoursRequest, opts ...grpc.CallOption) (*pb_sec.GetWorkingHoursResponse, error) {
+			return &pb_sec.GetWorkingHoursResponse{
+				Hours: []*pb_sec.ExchangeWorkingHours{
+					{Segment: "regular", OpenTime: "09:30", CloseTime: "16:00"},
+				},
+			}, nil
+		},
+		getExchangeByMIC: func(ctx context.Context, in *pb_sec.GetStockExchangeByMICRequest, opts ...grpc.CallOption) (*pb_sec.GetStockExchangeByMICResponse, error) {
+			return nil, fmt.Errorf("exchange lookup failed")
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").WillReturnRows(
+		sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"),
+	)
+	dbMock.ExpectQuery("INSERT INTO orders").WillReturnRows(
+		sqlmock.NewRows([]string{"id"}).AddRow(int64(15)),
+	)
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, int64(15), resp.OrderId)
+}
+
+// orderToProto coverage: non-nil optional fields (LimitValue, StopValue, ApprovedBy)
+
+func TestGetOrderById_NonNilOptionalFields(t *testing.T) {
+	srv, dbMock, _ := newOrderServer(t)
+	ts := time.Date(2025, 6, 1, 12, 0, 0, 0, time.UTC)
+	limitVal := float64(205.0)
+	stopVal := float64(195.0)
+	approvedBy := int64(7)
+
+	rows := sqlmock.NewRows(orderCols)
+	addOrderRow(rows, 5, 10, "EMPLOYEE", 3, "STOP_LIMIT", 20, 1, 200.0, limitVal, stopVal, "SELL", "APPROVED", approvedBy, false, ts, 20, false, false, false, 42)
+	dbMock.ExpectQuery("SELECT id, user_id").WillReturnRows(rows)
+
+	resp, err := srv.GetOrderById(context.Background(), &pb.GetOrderByIdRequest{Id: 5})
+	require.NoError(t, err)
+	assert.Equal(t, float64(205.0), resp.Order.LimitValue)
+	assert.Equal(t, float64(195.0), resp.Order.StopValue)
+	assert.Equal(t, int64(7), resp.Order.ApprovedBy)
+}
+
+// CancelOrderPortions error path
+
+func TestCancelOrderPortions_NotFound(t *testing.T) {
+	srv, dbMock, _ := newOrderServer(t)
+	dbMock.ExpectQuery("SELECT id, user_id").WillReturnError(sql.ErrNoRows)
+
+	_, err := srv.CancelOrderPortions(context.Background(), &pb.CancelOrderPortionsRequest{OrderId: 99, UserId: 10})
+	require.Error(t, err)
+	assert.Equal(t, codes.NotFound, status.Code(err))
+}
