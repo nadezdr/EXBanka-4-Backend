@@ -179,12 +179,10 @@ func (s *Scheduler) executeOrder(order models.Order) {
 		totalPrice := float64(fillQty) * float64(order.ContractSize) * pricePerUnit
 		commission := CalculateCommission(order.OrderType, totalPrice)
 
-		// 5. Transfer commission to bank account
-		if commission > 0 {
-			if err := s.transferCommission(ctx, currencyCode, commission); err != nil {
-				log.Printf("order-scheduler: commission transfer error for order %d: %v", order.ID, err)
-				// Non-fatal: continue with the fill
-			}
+		// 5. Settle account balance and transfer commission to bank.
+		if err := s.settleAccountAndCommission(ctx, order, totalPrice, commission, currencyCode); err != nil {
+			log.Printf("order-scheduler: settlement error for order %d: %v", order.ID, err)
+			// Non-fatal: continue with the fill
 		}
 
 		// 6. Record partial fill
@@ -284,28 +282,46 @@ func (s *Scheduler) listingCurrency(ctx context.Context, listingID int64) (strin
 	return currency, err
 }
 
-// transferCommission credits the bank account for the given currency with the commission amount.
-func (s *Scheduler) transferCommission(ctx context.Context, currencyCode string, amount float64) error {
-	var currencyID int64
-	err := s.ExchangeDB.QueryRowContext(ctx,
-		`SELECT id FROM currencies WHERE code = $1`, currencyCode,
-	).Scan(&currencyID)
-	if err != nil {
+// settleAccountAndCommission debits/credits the order account for the trade and
+// credits the commission to the bank account.
+//   - BUY:  deduct (totalPrice + commission) from the buyer's account
+//   - SELL: credit (totalPrice - commission) to the seller's account
+//   - commission: always credited to the bank account
+func (s *Scheduler) settleAccountAndCommission(ctx context.Context, order models.Order, totalPrice, commission float64, currencyCode string) error {
+	// Settle order account.
+	var accountDelta float64
+	if order.Direction == "BUY" {
+		accountDelta = -(totalPrice + commission)
+	} else {
+		accountDelta = totalPrice - commission
+	}
+	if _, err := s.AccountDB.ExecContext(ctx,
+		`UPDATE accounts SET balance = balance + $1, available_balance = available_balance + $1 WHERE id = $2`,
+		accountDelta, order.AccountID,
+	); err != nil {
 		return err
 	}
 
+	// Credit commission to bank account.
+	if commission <= 0 {
+		return nil
+	}
+	var currencyID int64
+	if err := s.ExchangeDB.QueryRowContext(ctx,
+		`SELECT id FROM currencies WHERE code = $1`, currencyCode,
+	).Scan(&currencyID); err != nil {
+		return err
+	}
 	var bankAccountID int64
-	err = s.AccountDB.QueryRowContext(ctx,
+	if err := s.AccountDB.QueryRowContext(ctx,
 		`SELECT id FROM accounts WHERE account_type = 'BANK' AND owner_id = 0 AND currency_id = $1`,
 		currencyID,
-	).Scan(&bankAccountID)
-	if err != nil {
+	).Scan(&bankAccountID); err != nil {
 		return err
 	}
-
-	_, err = s.AccountDB.ExecContext(ctx,
+	_, err := s.AccountDB.ExecContext(ctx,
 		`UPDATE accounts SET balance = balance + $1, available_balance = available_balance + $1 WHERE id = $2`,
-		amount, bankAccountID,
+		commission, bankAccountID,
 	)
 	return err
 }
