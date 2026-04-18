@@ -198,7 +198,8 @@ func main() {
 	r.DELETE("/stock-exchanges/holidays/:polity/:date", middleware.RequireRole("ADMIN"), handlers.DeleteHoliday(securitiesClient))
 	r.GET("/stock-exchanges/:id/is-open", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.IsExchangeOpen(securitiesClient))
 	r.POST("/orders", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.CreateOrder(orderClient))
-	r.GET("/orders", middleware.RequireRole("SUPERVISOR"), handlers.ListOrders(orderClient, employeeClient, securitiesClient))
+	r.POST("/client/orders", handlers.CreateOrder(orderClient))
+	r.GET("/orders", middleware.RequireRole("SUPERVISOR"), handlers.ListOrders(orderClient, securitiesClient))
 	r.GET("/orders/:id", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.GetOrderById(orderClient))
 	r.PUT("/orders/:id/approve", middleware.RequireRole("SUPERVISOR"), handlers.ApproveOrder(orderClient))
 	r.PUT("/orders/:id/decline", middleware.RequireRole("SUPERVISOR"), handlers.DeclineOrder(orderClient))
@@ -206,6 +207,8 @@ func main() {
 	r.DELETE("/orders/:id", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.CancelOrder(orderClient))
 	r.GET("/portfolio", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.GetPortfolio(portfolioClient))
 	r.GET("/portfolio/profit", middleware.RequireRole("AGENT", "SUPERVISOR"), handlers.GetProfit(portfolioClient))
+	r.GET("/client/portfolio", handlers.GetPortfolio(portfolioClient))
+	r.GET("/client/portfolio/profit", handlers.GetProfit(portfolioClient))
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	if err := r.Run(":8083"); err != nil {
 		log.Fatalf("server error: %v", err)

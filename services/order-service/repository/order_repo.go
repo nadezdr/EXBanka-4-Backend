@@ -159,6 +159,7 @@ func ListOrders(ctx context.Context, db *sql.DB, statusFilter string, agentID in
 		FROM orders
 		WHERE ($1 = '' OR $1 = 'ALL' OR status::text = $1)
 		  AND ($2 = 0 OR user_id = $2)
+		  AND user_type = 'EMPLOYEE'
 		ORDER BY last_modification DESC`,
 		statusFilter, agentID)
 	if err != nil {
