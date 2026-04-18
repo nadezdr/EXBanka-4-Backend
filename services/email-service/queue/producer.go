@@ -53,11 +53,16 @@ type LoanLatePaymentMessage struct {
 	RetryCount int32   `json:"retry_count"`
 }
 
-type Producer struct {
-	ch *amqp.Channel
+type Channel interface {
+	QueueDeclare(name string, durable, autoDelete, exclusive, noWait bool, args amqp.Table) (amqp.Queue, error)
+	Publish(exchange, key string, mandatory, immediate bool, msg amqp.Publishing) error
 }
 
-func NewProducer(ch *amqp.Channel) (*Producer, error) {
+type Producer struct {
+	ch Channel
+}
+
+func NewProducer(ch Channel) (*Producer, error) {
 	if _, err := ch.QueueDeclare(QueueName, true, false, false, false, nil); err != nil {
 		return nil, err
 	}
