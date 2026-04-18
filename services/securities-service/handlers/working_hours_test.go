@@ -290,7 +290,7 @@ func TestIsExchangeOpen_NoHoursConfigured(t *testing.T) {
 	mock.ExpectQuery("SELECT EXISTS").
 		WillReturnRows(sqlmock.NewRows([]string{"exists"}).AddRow(false))
 	// No working hours rows → exchange closed
-	mock.ExpectQuery("SELECT segment, open_time, close_time FROM exchange_working_hours").
+	mock.ExpectQuery("SELECT segment, TO_CHAR").
 		WithArgs("United States").
 		WillReturnRows(sqlmock.NewRows([]string{"segment", "open_time", "close_time"}))
 
