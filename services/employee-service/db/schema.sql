@@ -67,3 +67,6 @@ CREATE TABLE IF NOT EXISTS actuary_info (
     used_limit    NUMERIC NOT NULL DEFAULT 0,
     need_approval BOOLEAN NOT NULL DEFAULT false
 );
+INSERT INTO actuary_info (employee_id, limit_amount, used_limit, need_approval)
+SELECT id, 100000, 0, false FROM employees WHERE username = 'denis'
+ON CONFLICT DO NOTHING;
