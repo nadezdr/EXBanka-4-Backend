@@ -105,6 +105,12 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 		return nil, grpcstatus.Errorf(codes.Internal, "failed to insert order: %v", err)
 	}
 
+	// Deduct from agent's used limit for auto-approved orders.
+	// PENDING orders are deducted in ApproveOrder when the supervisor approves.
+	if isActuary && initialStatus == "APPROVED" {
+		_ = repository.DeductActuaryUsedLimit(ctx, s.EmployeeDB, req.UserId, approxPrice)
+	}
+
 	return &pb.CreateOrderResponse{
 		OrderId:          id,
 		OrderType:        orderType,

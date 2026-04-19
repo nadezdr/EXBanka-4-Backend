@@ -43,6 +43,10 @@ echo "Starting loan-db..."
 echo "Starting securities-db..."
 (cd "$REPO_ROOT/services/securities-service" && docker compose up -d)
 
+# Start order DB
+echo "Starting order-db..."
+(cd "$REPO_ROOT/services/order-service" && docker compose up -d)
+
 # Start portfolio DB
 echo "Starting portfolio-db..."
 (cd "$REPO_ROOT/services/portfolio-service" && docker compose up -d)
@@ -111,6 +115,13 @@ until docker exec $(docker compose -f "$REPO_ROOT/services/securities-service/do
 done
 echo "securities-db ready."
 
+echo "Waiting for order-db to be ready..."
+until docker exec $(docker compose -f "$REPO_ROOT/services/order-service/docker-compose.yml" ps -q order-db) \
+    pg_isready -U order_user -d order_db -q 2>/dev/null; do
+  sleep 1
+done
+echo "order-db ready."
+
 echo "Waiting for portfolio-db to be ready..."
 until docker exec $(docker compose -f "$REPO_ROOT/services/portfolio-service/docker-compose.yml" ps -q portfolio-db) \
     pg_isready -U portfolio_user -d portfolio_db -q 2>/dev/null; do
@@ -127,6 +138,9 @@ echo "email-rabbitmq ready."
 
 # Load environment variables
 set -a; source "$REPO_ROOT/.env"; set +a
+
+export ORDER_SERVICE_ADDR=localhost:50061
+export PORTFOLIO_SERVICE_ADDR=localhost:50062
 
 # Launch services in background, capture PIDs
 # Note: auth-service, client-service, employee-service each use DB_URL — pass per-process
@@ -166,6 +180,9 @@ SEC_PID=$!
 SECURITIES_SERVICE_ADDR=localhost:50060 go run "$REPO_ROOT/services/portfolio-service/" &
 PORTFOLIO_PID=$!
 
+go run "$REPO_ROOT/services/order-service/" &
+ORDER_PID=$!
+
 echo ""
 echo "All services started."
 echo "  employee-service  PID $EMP_PID   (:50051)"
@@ -179,6 +196,7 @@ echo "  card-service      PID $CARD_PID     (:50059)"
 echo "  loan-service        PID $LOAN_PID        (:50058)"
 echo "  securities-service  PID $SEC_PID         (:50060)"
 echo "  portfolio-service   PID $PORTFOLIO_PID   (:50062)"
+echo "  order-service       PID $ORDER_PID       (:50061)"
 echo "  api-gateway         PID $GW_PID          (:8083)"
 echo ""
 echo "Press Ctrl+C to stop all services."
@@ -197,6 +215,6 @@ echo "        cd services/loan-service && docker compose down
         cd services/portfolio-service && docker compose down"
 
 # On Ctrl+C, kill Go services only — containers are intentionally left running
-trap "echo ''; echo 'Stopping Go services...'; kill $EMP_PID $AUTH_PID $GW_PID $EMAIL_PID $ACC_PID $CLIENT_PID $EXCHANGE_PID $PAYMENT_PID $CARD_PID $LOAN_PID $SEC_PID $PORTFOLIO_PID 2>/dev/null; exit 0" INT
+trap "echo ''; echo 'Stopping Go services...'; kill $EMP_PID $AUTH_PID $GW_PID $EMAIL_PID $ACC_PID $CLIENT_PID $EXCHANGE_PID $PAYMENT_PID $CARD_PID $LOAN_PID $SEC_PID $PORTFOLIO_PID $ORDER_PID 2>/dev/null; exit 0" INT
 
 wait
