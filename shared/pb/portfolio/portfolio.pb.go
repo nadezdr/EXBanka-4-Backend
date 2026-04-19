@@ -588,9 +588,10 @@ const file_portfolio_proto_rawDesc = "" +
 	"\tdirection\x18\x06 \x01(\tR\tdirection\x12\x1d\n" +
 	"\n" +
 	"account_id\x18\a \x01(\x03R\taccountId\"\x17\n" +
-	"\x15UpdateHoldingResponse\".\n" +
+	"\x15UpdateHoldingResponse\"K\n" +
 	"\x13GetPortfolioRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"\xdf\x02\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tuser_type\x18\x02 \x01(\tR\buserType\"\xdf\x02\n" +
 	"\x0ePortfolioEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x1d\n" +
 	"\n" +
@@ -609,9 +610,10 @@ const file_portfolio_proto_rawDesc = "" +
 	"\x05price\x18\v \x01(\x01R\x05price\x12\x16\n" +
 	"\x06profit\x18\f \x01(\x01R\x06profit\"K\n" +
 	"\x14GetPortfolioResponse\x123\n" +
-	"\aentries\x18\x01 \x03(\v2\x19.portfolio.PortfolioEntryR\aentries\"+\n" +
+	"\aentries\x18\x01 \x03(\v2\x19.portfolio.PortfolioEntryR\aentries\"H\n" +
 	"\x10GetProfitRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\x03R\x06userId\"6\n" +
+	"\auser_id\x18\x01 \x01(\x03R\x06userId\x12\x1b\n" +
+	"\tuser_type\x18\x02 \x01(\tR\buserType\"6\n" +
 	"\x11GetProfitResponse\x12!\n" +
 	"\ftotal_profit\x18\x01 \x01(\x01R\vtotalProfit\"h\n" +
 	"\x16SetPublicAmountRequest\x12\x17\n" +
