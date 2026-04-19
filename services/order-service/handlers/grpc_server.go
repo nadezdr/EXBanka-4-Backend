@@ -54,6 +54,19 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 	}
 	approxPrice := execution.ApproximatePrice(contractSize, pricePerUnit, req.Quantity)
 
+	// 3b. For CLIENT BUY orders, reject if account has insufficient funds.
+	if req.Direction == "BUY" && req.UserType == "CLIENT" {
+		var availBalance float64
+		if err := s.AccountDB.QueryRowContext(ctx,
+			`SELECT available_balance FROM accounts WHERE id = $1`, req.AccountId,
+		).Scan(&availBalance); err != nil {
+			return nil, grpcstatus.Errorf(codes.Internal, "failed to check balance: %v", err)
+		}
+		if availBalance < approxPrice {
+			return nil, grpcstatus.Errorf(codes.FailedPrecondition, "insufficient funds")
+		}
+	}
+
 	// 4. After-hours check via working hours
 	afterHours := s.checkAfterHours(ctx, listingResp)
 
