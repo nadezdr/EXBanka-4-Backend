@@ -73,9 +73,9 @@ func addOrderRow(rows *sqlmock.Rows, id, userID int64, userType string, assetID 
 
 // mockSecClient is a configurable mock for pb_sec.SecuritiesServiceClient.
 type mockSecClient struct {
-	getListingById    func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error)
-	getWorkingHours   func(ctx context.Context, in *pb_sec.GetWorkingHoursRequest, opts ...grpc.CallOption) (*pb_sec.GetWorkingHoursResponse, error)
-	getExchangeByMIC  func(ctx context.Context, in *pb_sec.GetStockExchangeByMICRequest, opts ...grpc.CallOption) (*pb_sec.GetStockExchangeByMICResponse, error)
+	getListingById   func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error)
+	getWorkingHours  func(ctx context.Context, in *pb_sec.GetWorkingHoursRequest, opts ...grpc.CallOption) (*pb_sec.GetWorkingHoursResponse, error)
+	getExchangeByMIC func(ctx context.Context, in *pb_sec.GetStockExchangeByMICRequest, opts ...grpc.CallOption) (*pb_sec.GetStockExchangeByMICResponse, error)
 }
 
 func (m *mockSecClient) Ping(ctx context.Context, in *pb_sec.PingRequest, opts ...grpc.CallOption) (*pb_sec.PingResponse, error) {
