@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	pb "github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/order"
+	pb_emp "github.com/RAF-SI-2025/EXBanka-4-Backend/shared/pb/employee"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -71,6 +72,53 @@ func (s *stubOrderClient) CancelOrderPortions(ctx context.Context, in *pb.Cancel
 	return nil, fmt.Errorf("not implemented")
 }
 
+// ---- stub employee client ----
+
+type stubEmployeeClient struct{}
+
+func (s *stubEmployeeClient) GetAllEmployees(_ context.Context, _ *pb_emp.GetAllEmployeesRequest, _ ...grpc.CallOption) (*pb_emp.GetAllEmployeesResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) SearchEmployees(_ context.Context, _ *pb_emp.SearchEmployeesRequest, _ ...grpc.CallOption) (*pb_emp.SearchEmployeesResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) GetEmployeeCredentials(_ context.Context, _ *pb_emp.GetEmployeeCredentialsRequest, _ ...grpc.CallOption) (*pb_emp.GetEmployeeCredentialsResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) CreateEmployee(_ context.Context, _ *pb_emp.CreateEmployeeRequest, _ ...grpc.CallOption) (*pb_emp.CreateEmployeeResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) GetEmployeeById(_ context.Context, _ *pb_emp.GetEmployeeByIdRequest, _ ...grpc.CallOption) (*pb_emp.GetEmployeeByIdResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) UpdateEmployee(_ context.Context, _ *pb_emp.UpdateEmployeeRequest, _ ...grpc.CallOption) (*pb_emp.UpdateEmployeeResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) ActivateEmployee(_ context.Context, _ *pb_emp.ActivateEmployeeRequest, _ ...grpc.CallOption) (*pb_emp.ActivateEmployeeResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) GetEmployeeByEmail(_ context.Context, _ *pb_emp.GetEmployeeByEmailRequest, _ ...grpc.CallOption) (*pb_emp.GetEmployeeByEmailResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) UpdatePassword(_ context.Context, _ *pb_emp.UpdatePasswordRequest, _ ...grpc.CallOption) (*pb_emp.UpdatePasswordResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) GetActuaries(_ context.Context, _ *pb_emp.GetActuariesRequest, _ ...grpc.CallOption) (*pb_emp.GetActuariesResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) SetAgentLimit(_ context.Context, _ *pb_emp.SetAgentLimitRequest, _ ...grpc.CallOption) (*pb_emp.SetAgentLimitResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) ResetAgentUsedLimit(_ context.Context, _ *pb_emp.ResetAgentUsedLimitRequest, _ ...grpc.CallOption) (*pb_emp.ResetAgentUsedLimitResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) SetNeedApproval(_ context.Context, _ *pb_emp.SetNeedApprovalRequest, _ ...grpc.CallOption) (*pb_emp.SetNeedApprovalResponse, error) {
+	return nil, nil
+}
+func (s *stubEmployeeClient) ResetAllActuaryUsedLimits(_ context.Context, _ *pb_emp.ResetAllActuaryUsedLimitsRequest, _ ...grpc.CallOption) (*pb_emp.ResetAllActuaryUsedLimitsResponse, error) {
+	return nil, nil
+}
+
 // ---- CreateOrder ----
 
 func TestCreateOrder_BadJSON(t *testing.T) {
@@ -114,7 +162,7 @@ func TestListOrders_GrpcError(t *testing.T) {
 			return nil, fmt.Errorf("db error")
 		},
 	}
-	w := serveHandler(ListOrders(client), "GET", "/orders", "/orders", "")
+	w := serveHandler(ListOrders(client, &stubEmployeeClient{}, &stubSecuritiesClient{}), "GET", "/orders", "/orders", "")
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
 
@@ -124,7 +172,7 @@ func TestListOrders_Happy(t *testing.T) {
 			return &pb.ListOrdersResponse{Orders: []*pb.Order{}}, nil
 		},
 	}
-	w := serveHandler(ListOrders(client), "GET", "/orders", "/orders?status=PENDING", "")
+	w := serveHandler(ListOrders(client, &stubEmployeeClient{}, &stubSecuritiesClient{}), "GET", "/orders", "/orders?status=PENDING", "")
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
@@ -291,7 +339,7 @@ func TestOrderError_NotFound(t *testing.T) {
 			return nil, status.Error(codes.NotFound, "not found")
 		},
 	}
-	w := serveHandler(ListOrders(client), "GET", "/orders", "/orders", "")
+	w := serveHandler(ListOrders(client, &stubEmployeeClient{}, &stubSecuritiesClient{}), "GET", "/orders", "/orders", "")
 	assert.Equal(t, http.StatusNotFound, w.Code)
 }
 
@@ -301,6 +349,6 @@ func TestOrderError_PermissionDenied(t *testing.T) {
 			return nil, status.Error(codes.PermissionDenied, "forbidden")
 		},
 	}
-	w := serveHandler(ListOrders(client), "GET", "/orders", "/orders", "")
+	w := serveHandler(ListOrders(client, &stubEmployeeClient{}, &stubSecuritiesClient{}), "GET", "/orders", "/orders", "")
 	assert.Equal(t, http.StatusForbidden, w.Code)
 }

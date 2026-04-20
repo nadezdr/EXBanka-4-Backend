@@ -169,14 +169,16 @@ func (s *Scheduler) executeOrder(order models.Order) {
 		}
 
 		// 4. AON: only fill if we can fill everything at once
-		fillQty := int32(rand.Int32N(remaining) + 1)
+		aonQty, aonOk := DetermineAONFillQty(order.IsAON, remaining, order.Quantity)
+		if !aonOk {
+			time.Sleep(5 * time.Second)
+			continue
+		}
+		var fillQty int32
 		if order.IsAON {
-			if remaining != order.Quantity {
-				// A prior partial fill happened — shouldn't occur for AON, but guard anyway
-				time.Sleep(5 * time.Second)
-				continue
-			}
-			fillQty = remaining // must fill all at once
+			fillQty = aonQty
+		} else {
+			fillQty = int32(rand.Int32N(remaining) + 1)
 		}
 
 		totalPrice := float64(fillQty) * float64(order.ContractSize) * pricePerUnit

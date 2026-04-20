@@ -244,3 +244,52 @@ func TestFillIntervalZeroRemaining(t *testing.T) {
 	d := FillInterval(1_000_000, 0, false)
 	assert.Equal(t, 5*time.Second, d)
 }
+
+// --- STOP_LIMIT limit guard (S62) ---
+
+func TestStopLimitBuyAboveLimit(t *testing.T) {
+	// ask=110 >= stop=105 (triggered), but ask=110 > limit=108 → should NOT execute
+	_, ok := CalculatePrice("STOP_LIMIT", "BUY", 110.0, 108.0, 108.0, 105.0)
+	assert.False(t, ok)
+}
+
+func TestStopLimitBuyAtLimit(t *testing.T) {
+	// ask=108 >= stop=105, ask=108 == limit=108 → executes at ask
+	price, ok := CalculatePrice("STOP_LIMIT", "BUY", 108.0, 106.0, 108.0, 105.0)
+	assert.True(t, ok)
+	assert.Equal(t, 108.0, price)
+}
+
+func TestStopLimitSellBelowLimit(t *testing.T) {
+	// bid=94 < stop=100 (triggered), but bid=94 < limit=96 → should NOT execute
+	_, ok := CalculatePrice("STOP_LIMIT", "SELL", 97.0, 94.0, 96.0, 100.0)
+	assert.False(t, ok)
+}
+
+func TestStopLimitSellAtLimit(t *testing.T) {
+	// bid=96 < stop=100, bid=96 == limit=96 → executes at bid
+	price, ok := CalculatePrice("STOP_LIMIT", "SELL", 98.0, 96.0, 96.0, 100.0)
+	assert.True(t, ok)
+	assert.Equal(t, 96.0, price)
+}
+
+// --- DetermineAONFillQty (S60) ---
+
+func TestAONFillQty_NotAON(t *testing.T) {
+	qty, ok := DetermineAONFillQty(false, 5, 10)
+	assert.True(t, ok)
+	assert.Equal(t, int32(5), qty)
+}
+
+func TestAONFillQty_FullFill(t *testing.T) {
+	// AON order, remaining == total → must fill all at once
+	qty, ok := DetermineAONFillQty(true, 10, 10)
+	assert.True(t, ok)
+	assert.Equal(t, int32(10), qty)
+}
+
+func TestAONFillQty_PartialFillBlocked(t *testing.T) {
+	// AON order where a prior partial fill occurred — must wait
+	_, ok := DetermineAONFillQty(true, 7, 10)
+	assert.False(t, ok)
+}

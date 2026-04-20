@@ -46,13 +46,14 @@ func CalculatePrice(orderType, direction string, ask, bid, limitValue, stopValue
 
 	case "STOP_LIMIT":
 		if direction == "BUY" {
-			if ask >= stopValue {
+			// Stop triggers when ask breaks above stopValue; limit caps the max purchase price.
+			if ask >= stopValue && ask <= limitValue {
 				return ask, true
 			}
 			return 0, false
 		}
-		// SELL
-		if bid < stopValue {
+		// SELL: stop triggers when bid drops below stopValue; limit guards the min sell price.
+		if bid < stopValue && bid >= limitValue {
 			return bid, true
 		}
 		return 0, false
@@ -136,4 +137,19 @@ func ValidateMargin(initialMarginCost, loanAmount, accountBalance float64) bool 
 func parseHHMM(s string, h, m *int) (int, error) {
 	n, err := fmt.Sscanf(s, "%d:%d", h, m)
 	return n, err
+}
+
+// DetermineAONFillQty returns the fill quantity and whether the fill can proceed.
+// For non-AON orders it returns (remaining, true) so the caller can randomize.
+// For AON orders, all units must be filled at once: returns (remaining, true) only
+// when remaining == total (no prior partial fill). If a partial fill has already
+// occurred it returns (0, false) and the caller should wait and retry.
+func DetermineAONFillQty(isAON bool, remaining, total int32) (qty int32, ok bool) {
+	if !isAON {
+		return remaining, true
+	}
+	if remaining != total {
+		return 0, false
+	}
+	return remaining, true
 }
