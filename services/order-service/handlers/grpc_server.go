@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/RAF-SI-2025/EXBanka-4-Backend/services/order-service/approval"
@@ -94,13 +95,34 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 	afterHours := s.checkAfterHours(ctx, listingResp)
 
 	// 5. Determine initial approval status
+	// Convert approxPrice to RSD so it can be compared against the RSD-denominated actuary limit.
+	approxPriceRSD := approxPrice
+	if req.UserType == "EMPLOYEE" {
+		var listingCurrency string
+		_ = s.SecuritiesDB.QueryRowContext(ctx, `
+			SELECT e.currency FROM listing l
+			JOIN stock_exchanges e ON l.exchange_id = e.id
+			WHERE l.id = $1`, req.AssetId,
+		).Scan(&listingCurrency)
+		if listingCurrency != "" && listingCurrency != "RSD" {
+			var sellingRate float64
+			err := s.ExchangeDB.QueryRowContext(ctx,
+				`SELECT selling_rate FROM daily_exchange_rates WHERE currency_code = $1 AND date = CURRENT_DATE`,
+				listingCurrency,
+			).Scan(&sellingRate)
+			if err == nil && sellingRate > 0 {
+				approxPriceRSD = approxPrice * sellingRate
+			}
+		}
+	}
+
 	isActuary := false
 	needsApproval := false
 	if req.UserType == "EMPLOYEE" {
 		limitAmount, usedLimit, needApprovalFlag, err := repository.GetActuaryInfo(ctx, s.EmployeeDB, req.UserId)
 		if err == nil {
 			isActuary = true
-			needsApproval = approval.NeedsApproval(needApprovalFlag, usedLimit, limitAmount, approxPrice, req.Direction)
+			needsApproval = approval.NeedsApproval(needApprovalFlag, usedLimit, limitAmount, approxPriceRSD, req.Direction)
 		}
 		// sql.ErrNoRows → supervisor, isActuary stays false
 	}
@@ -145,7 +167,9 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 	// SELL orders do not count against the limit.
 	// PENDING orders are deducted in ApproveOrder when the supervisor approves.
 	if isActuary && initialStatus == "APPROVED" && req.Direction == "BUY" {
-		_ = repository.DeductActuaryUsedLimit(ctx, s.EmployeeDB, req.UserId, approxPrice)
+		if err := repository.DeductActuaryUsedLimit(ctx, s.EmployeeDB, req.UserId, approxPriceRSD); err != nil {
+			log.Printf("order: DeductActuaryUsedLimit user=%d: %v", req.UserId, err)
+		}
 	}
 
 	return &pb.CreateOrderResponse{

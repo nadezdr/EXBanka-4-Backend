@@ -162,8 +162,8 @@ func (s *Scheduler) executeOrder(order models.Order) {
 			limitValue, stopValue,
 		)
 
-		if !canExecute {
-			// Price conditions not met; wait and retry
+		if !canExecute || pricePerUnit == 0 {
+			// Price conditions not met or no price data yet; wait and retry
 			time.Sleep(FillInterval(fresh.Volume, remaining, order.AfterHours))
 			continue
 		}
