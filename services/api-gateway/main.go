@@ -135,7 +135,7 @@ func main() {
 	r.PUT("/api/accounts/:accountId/limits", middleware.RequireRole("READ"), handlers.UpdateAccountLimits(accountClient))
 	r.POST("/api/accounts/create", middleware.RequireRole("READ"), handlers.CreateAccount(accountClient, cardClient))
 	r.DELETE("/api/accounts/:accountId", middleware.RequireRole("READ"), handlers.DeleteAccount(accountClient))
-	r.GET("/api/bank-accounts", middleware.RequireRole("ADMIN", "AGENT"), handlers.GetBankAccounts(accountClient))
+	r.GET("/api/bank-accounts", middleware.RequireRole("ADMIN", "AGENT", "SUPERVISOR"), handlers.GetBankAccounts(accountClient))
 	r.POST("/login", handlers.Login(authClient))
 	r.POST("/refresh", handlers.Refresh(authClient))
 	r.POST("/client/login", handlers.ClientLogin(authClient))

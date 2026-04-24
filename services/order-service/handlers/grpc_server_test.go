@@ -76,6 +76,7 @@ type mockSecClient struct {
 	getListingById   func(ctx context.Context, in *pb_sec.GetListingByIdRequest, opts ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error)
 	getWorkingHours  func(ctx context.Context, in *pb_sec.GetWorkingHoursRequest, opts ...grpc.CallOption) (*pb_sec.GetWorkingHoursResponse, error)
 	getExchangeByMIC func(ctx context.Context, in *pb_sec.GetStockExchangeByMICRequest, opts ...grpc.CallOption) (*pb_sec.GetStockExchangeByMICResponse, error)
+	isExchangeOpen   func(ctx context.Context, in *pb_sec.IsExchangeOpenRequest, opts ...grpc.CallOption) (*pb_sec.IsExchangeOpenResponse, error)
 }
 
 func (m *mockSecClient) Ping(ctx context.Context, in *pb_sec.PingRequest, opts ...grpc.CallOption) (*pb_sec.PingResponse, error) {
@@ -121,6 +122,9 @@ func (m *mockSecClient) DeleteHoliday(ctx context.Context, in *pb_sec.DeleteHoli
 	return nil, fmt.Errorf("not mocked")
 }
 func (m *mockSecClient) IsExchangeOpen(ctx context.Context, in *pb_sec.IsExchangeOpenRequest, opts ...grpc.CallOption) (*pb_sec.IsExchangeOpenResponse, error) {
+	if m.isExchangeOpen != nil {
+		return m.isExchangeOpen(ctx, in, opts...)
+	}
 	return nil, fmt.Errorf("not mocked")
 }
 func (m *mockSecClient) GetTestMode(ctx context.Context, in *pb_sec.GetTestModeRequest, opts ...grpc.CallOption) (*pb_sec.GetTestModeResponse, error) {
@@ -852,6 +856,112 @@ func TestGetOrderById_NonNilOptionalFields(t *testing.T) {
 	assert.Equal(t, float64(205.0), resp.Order.LimitValue)
 	assert.Equal(t, float64(195.0), resp.Order.StopValue)
 	assert.Equal(t, int64(7), resp.Order.ApprovedBy)
+}
+
+// ─────────────────────────────────────────────
+// Exchange open check (checkExchangeStatus)
+// ─────────────────────────────────────────────
+
+func TestCreateOrder_ExchangeClosed_Rejected(t *testing.T) {
+	srv, _, _, secMock, _ := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(_ context.Context, _ *pb_sec.GetListingByIdRequest, _ ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		isExchangeOpen: func(_ context.Context, _ *pb_sec.IsExchangeOpenRequest, _ ...grpc.CallOption) (*pb_sec.IsExchangeOpenResponse, error) {
+			return &pb_sec.IsExchangeOpenResponse{IsOpen: false, Segment: "closed"}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").
+		WillReturnRows(sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"))
+
+	_, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.Error(t, err)
+	assert.Equal(t, codes.FailedPrecondition, status.Code(err))
+	assert.Contains(t, err.Error(), "exchange is currently closed")
+}
+
+func TestCreateOrder_ExchangeOpen_TestMode_Allowed(t *testing.T) {
+	srv, dbMock, _, secMock, accMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(_ context.Context, _ *pb_sec.GetListingByIdRequest, _ ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		isExchangeOpen: func(_ context.Context, _ *pb_sec.IsExchangeOpenRequest, _ ...grpc.CallOption) (*pb_sec.IsExchangeOpenResponse, error) {
+			return &pb_sec.IsExchangeOpenResponse{IsOpen: true, Segment: "test_mode"}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").
+		WillReturnRows(sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"))
+	accMock.ExpectQuery("SELECT available_balance FROM accounts").
+		WillReturnRows(sqlmock.NewRows([]string{"available_balance"}).AddRow(float64(999999)))
+	dbMock.ExpectQuery("INSERT INTO orders").
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(int64(20)))
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, int64(20), resp.OrderId)
+}
+
+func TestCreateOrder_ExchangeOpen_Regular_Allowed(t *testing.T) {
+	srv, dbMock, _, secMock, accMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(_ context.Context, _ *pb_sec.GetListingByIdRequest, _ ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		isExchangeOpen: func(_ context.Context, _ *pb_sec.IsExchangeOpenRequest, _ ...grpc.CallOption) (*pb_sec.IsExchangeOpenResponse, error) {
+			return &pb_sec.IsExchangeOpenResponse{IsOpen: true, Segment: "regular"}, nil
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").
+		WillReturnRows(sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"))
+	accMock.ExpectQuery("SELECT available_balance FROM accounts").
+		WillReturnRows(sqlmock.NewRows([]string{"available_balance"}).AddRow(float64(999999)))
+	dbMock.ExpectQuery("INSERT INTO orders").
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(int64(21)))
+
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, int64(21), resp.OrderId)
+}
+
+func TestCreateOrder_IsExchangeOpenError_FailOpen(t *testing.T) {
+	srv, dbMock, _, secMock, accMock := newOrderServerWithSecDB(t)
+	srv.SecuritiesClient = &mockSecClient{
+		getListingById: func(_ context.Context, _ *pb_sec.GetListingByIdRequest, _ ...grpc.CallOption) (*pb_sec.GetListingByIdResponse, error) {
+			return &pb_sec.GetListingByIdResponse{
+				Summary: &pb_sec.ListingSummary{Ask: 150.0, Bid: 148.0, ExchangeAcronym: "NYSE"},
+			}, nil
+		},
+		isExchangeOpen: func(_ context.Context, _ *pb_sec.IsExchangeOpenRequest, _ ...grpc.CallOption) (*pb_sec.IsExchangeOpenResponse, error) {
+			return nil, fmt.Errorf("securities-service unavailable")
+		},
+	}
+	secMock.ExpectQuery("SELECT mic_code FROM stock_exchanges").
+		WillReturnRows(sqlmock.NewRows([]string{"mic_code"}).AddRow("XNYS"))
+	accMock.ExpectQuery("SELECT available_balance FROM accounts").
+		WillReturnRows(sqlmock.NewRows([]string{"available_balance"}).AddRow(float64(999999)))
+	dbMock.ExpectQuery("INSERT INTO orders").
+		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(int64(22)))
+
+	// When IsExchangeOpen errors, order should still be created (fail open)
+	resp, err := srv.CreateOrder(context.Background(), &pb.CreateOrderRequest{
+		UserId: 1, UserType: "CLIENT", AssetId: 5, Quantity: 10, AccountId: 42, Direction: "BUY",
+	})
+	require.NoError(t, err)
+	assert.Equal(t, int64(22), resp.OrderId)
 }
 
 // CancelOrderPortions error path

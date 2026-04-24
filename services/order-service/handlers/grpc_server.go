@@ -49,7 +49,13 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 	}
 	listing := listingResp.Summary
 
-	// 3. Calculate price per unit and approximate price
+	// 3. Exchange open check — reject if market is closed; determine after-hours flag.
+	isOpen, afterHours := s.checkExchangeStatus(ctx, listingResp)
+	if !isOpen {
+		return nil, grpcstatus.Errorf(codes.FailedPrecondition, "exchange is currently closed")
+	}
+
+	// 4. Calculate price per unit and approximate price
 	pricePerUnit, _ := execution.CalculatePrice(orderType, req.Direction, listing.Ask, listing.Bid, req.LimitValue, req.StopValue)
 	contractSize := int32(1)
 	if futures := listingResp.GetFutures(); futures != nil {
@@ -57,7 +63,7 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 	}
 	approxPrice := execution.ApproximatePrice(contractSize, pricePerUnit, req.Quantity)
 
-	// 3b. For CLIENT BUY orders, reject if account has insufficient funds.
+	// 4b. For CLIENT BUY orders, reject if account has insufficient funds.
 	if req.Direction == "BUY" && req.UserType == "CLIENT" {
 		var availBalance float64
 		if err := s.AccountDB.QueryRowContext(ctx,
@@ -90,9 +96,6 @@ func (s *OrderServer) CreateOrder(ctx context.Context, req *pb.CreateOrderReques
 			return nil, grpcstatus.Errorf(codes.FailedPrecondition, "insufficient holdings: have %d, need %d", held, req.Quantity)
 		}
 	}
-
-	// 4. After-hours check via working hours
-	afterHours := s.checkAfterHours(ctx, listingResp)
 
 	// 5. Determine initial approval status
 	// Convert approxPrice to RSD so it can be compared against the RSD-denominated actuary limit.
@@ -282,32 +285,32 @@ func determineOrderType(limitValue, stopValue float64) string {
 	}
 }
 
-// checkAfterHours fetches working hours for the listing's exchange and checks after-hours status.
-func (s *OrderServer) checkAfterHours(ctx context.Context, listingResp *pb_sec.GetListingByIdResponse) bool {
-	micCode := "" // resolve MIC from exchange_acronym via SecuritiesDB
+// checkExchangeStatus returns (isOpen, afterHours).
+// isOpen=false means the exchange is closed and the order should be rejected.
+// afterHours=true means the order is placed during pre/post-market hours.
+// On any error the call fails open (isOpen=true, afterHours=false) so a
+// temporary securities-service hiccup does not block all trading.
+func (s *OrderServer) checkExchangeStatus(ctx context.Context, listingResp *pb_sec.GetListingByIdResponse) (isOpen bool, afterHours bool) {
+	var micCode string
 	if err := s.SecuritiesDB.QueryRowContext(ctx,
 		`SELECT mic_code FROM stock_exchanges WHERE acronym = $1`,
 		listingResp.Summary.ExchangeAcronym,
 	).Scan(&micCode); err != nil || micCode == "" {
-		return false
+		log.Printf("order: checkExchangeStatus: MIC lookup failed for acronym %q, failing open", listingResp.Summary.ExchangeAcronym)
+		return true, false
 	}
 
-	hoursResp, err := s.SecuritiesClient.GetWorkingHours(ctx, &pb_sec.GetWorkingHoursRequest{MicCode: micCode})
+	resp, err := s.SecuritiesClient.IsExchangeOpen(ctx, &pb_sec.IsExchangeOpenRequest{MicCode: micCode})
 	if err != nil {
-		return false
+		log.Printf("order: checkExchangeStatus: IsExchangeOpen(%s) error: %v, failing open", micCode, err)
+		return true, false
 	}
 
-	// Use the "regular" session's close time
-	for _, h := range hoursResp.Hours {
-		if h.Segment == "regular" {
-			exchResp, err := s.SecuritiesClient.GetStockExchangeByMIC(ctx, &pb_sec.GetStockExchangeByMICRequest{MicCode: micCode})
-			if err != nil {
-				return false
-			}
-			return execution.IsAfterHours(h.CloseTime, exchResp.Exchange.Timezone, time.Now())
-		}
+	if !resp.IsOpen {
+		return false, false
 	}
-	return false
+	afterHours = resp.Segment == "pre_market" || resp.Segment == "post_market"
+	return true, afterHours
 }
 
 // orderToProto converts a models.Order to its proto representation.
